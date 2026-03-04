@@ -29,12 +29,13 @@ Please refer to the LICENSE files in the LICENSES/ directory for complete
 license texts:
 
 - **Qt Framework**: GNU Lesser General Public License v3 (LGPL v3)
-  See: LICENSES/Qt-LICENSE.txt
+  See: docs/LICENSES/Qt-LICENSE.txt
 
 - **OpenCV**: Apache License 2.0
-  See: LICENSES/OpenCV-LICENSE.txt
+  See: docs/LICENSES/OpenCV-LICENSE.txt
 
 - **SeetaFace6Open**: 
-  See: LICENSES/SeetaFace6Open-LICENSE.txt
+  See: docs/LICENSES/SeetaFace6Open-LICENSE.txt
 
-For a summary of all third-party components, see NOTICE file.
+For a summary of all third-party components, see docs/NOTICE file.
+
