@@ -1,0 +1,70 @@
+QTcanteen - Third-Party Software Notices
+
+This file contains attributions and license information for third-party
+software components used in this project.
+
+---
+
+## Qt Framework
+
+Copyright (C) 2024 The Qt Company Ltd.
+Contact: https://www.qt.io/licensing/
+
+This software uses Qt under the terms of the GNU Lesser General Public License
+version 3 (LGPL v3) or the Qt Commercial License Agreement.
+
+Qt is used for:
+- GUI framework and user interface components
+- Network communication (TCP sockets)
+- Multimedia support (camera and video capture)
+- Cross-platform development
+
+For the complete Qt license text, see: LICENSES/Qt-LICENSE.txt
+
+Qt and the Qt logo are trademarks of The Qt Company Ltd.
+
+---
+
+## OpenCV (Open Source Computer Vision Library)
+
+Copyright (C) 2000-2024, Intel Corporation, all rights reserved.
+Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+Copyright (C) 2009-2016, NVIDIA Corporation, all rights reserved.
+Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+Copyright (C) 2015-2016, OpenCV Foundation, all rights reserved.
+Copyright (C) 2015-2016, Itseez Inc., all rights reserved.
+Copyright (C) 2019-2020, Xperience AI, all rights reserved.
+Copyright (C) 2019-2020, Shenzhen Institute of Artificial Intelligence and Robot for Society, all rights reserved.
+Copyright (C) 2020-2024, plus many others.
+
+OpenCV is licensed under the Apache License, Version 2.0.
+
+OpenCV is used for:
+- Face detection using Haar Cascade classifiers
+- Face recognition using LBPH (Local Binary Patterns Histograms)
+- Image processing and computer vision operations
+
+For the complete OpenCV license text, see: LICENSES/OpenCV-LICENSE.txt
+
+---
+
+## SeetaFace6Open
+
+SeetaFace6Open is provided by Seeta Technology Co., Ltd.
+
+SeetaFace6Open is used for:
+- Advanced face detection
+- Face landmark detection
+- Face recognition and feature extraction
+
+For licensing information and complete license text, see:
+LICENSES/SeetaFace6Open-LICENSE.txt
+
+Official repository: https://github.com/SeetaFace6Open/index
+
+---
+
+## Project License
+
+The QTcanteen project code (excluding third-party libraries) is licensed
+under the MIT License. See LICENSE file for details.

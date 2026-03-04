@@ -1,0 +1,188 @@
+# ============================================
+# Qt / CMake 构建文件
+# ============================================
+# CMake 生成的文件
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+*.cmake
+!CMakeLists.txt
+
+# Qt Creator 配置
+.qtcreator/
+*.pro.user
+*.pro.user.*
+
+# 构建目录
+build/
+out/
+bin/
+lib/
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# ============================================
+# 编译产物
+# ============================================
+# 对象文件
+*.o
+*.obj
+*.lo
+*.slo
+
+# 预编译头文件
+*.gch
+*.pch
+
+# 链接文件
+*.ilk
+*.map
+*.exp
+
+# 调试文件
+*.pdb
+*.idb
+*.ipdb
+
+# 自动生成的文件
+*_autogen/
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.moc
+
+# ============================================
+# 运行时数据文件（用户生成的数据）
+# ============================================
+# JSON 数据文件（运行时生成）
+user.json
+user.json.bak
+dishes.json
+dishes.json.bak
+orders.json
+orders.json.bak
+
+# 人脸识别模型文件（运行时生成）
+face_model.xml
+face_model_deep.json
+face_model_mapping.json
+faces/
+*.jpg
+*.jpeg
+*.png
+# images 目录只保留空文件夹，不包含图片文件
+images/*
+!images/.gitkeep
+
+# ============================================
+# 第三方库文件（如果包含在项目中）
+# ============================================
+# SeetaFace DLL 文件（运行时需要，但不应该提交）
+libSeeta*.dll
+libtennis.dll
+
+# OpenCV Haar Cascade 文件（如果从OpenCV复制到项目）
+haarcascade_*.xml
+
+# DNN 模型文件（如果下载到项目中，可选）
+# 如果模型文件很大，建议排除；如果作为示例，可以保留
+# models/*.t7
+# models/*.pb
+# models/*.onnx
+
+# ============================================
+# IDE 和编辑器文件
+# ============================================
+# Visual Studio
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# CLion
+.idea/
+cmake-build-*/
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# ============================================
+# 临时文件和备份
+# ============================================
+# 备份文件
+*.bak
+*.backup
+*~
+*.swp
+*.swo
+*.tmp
+
+# 日志文件
+*.log
+*.log.*
+
+# 测试文件
+Testing/
+test-results/
+
+# ============================================
+# 系统文件
+# ============================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# 翻译文件（编译生成）
+# ============================================
+*.qm
+# 保留 .ts 源文件，排除编译后的 .qm 文件
+
+# ============================================
+# 其他
+# ============================================
+# 环境变量和配置（可能包含敏感信息）
+.env
+.env.local
+config.local.*
+
+# 打包文件
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# 文档构建产物（如果使用文档生成工具）
+html/
+latex/

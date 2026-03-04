@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0" version="29.6.0">
+  <diagram name="第 1 页" id="3c9baEm8-c-sFitU62TQ">
+    <mxGraphModel dx="1017" dy="500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="E3n8n1fjbyXGtovcH-07-13" edge="1" parent="1" source="E3n8n1fjbyXGtovcH-07-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="E3n8n1fjbyXGtovcH-07-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-18" edge="1" parent="1" source="E3n8n1fjbyXGtovcH-07-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="E3n8n1fjbyXGtovcH-07-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="客户端" vertex="1">
+          <mxGeometry height="60" width="120" x="129" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-19" edge="1" parent="1" source="E3n8n1fjbyXGtovcH-07-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E3n8n1fjbyXGtovcH-07-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="商家端（服务器）" vertex="1">
+          <mxGeometry height="60" width="120" x="589" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-5" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="无账密要求直接登录（根据实际需求使用微信扫码或小程序登录）" vertex="1">
+          <mxGeometry height="30" width="60" x="39" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-6" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="通过账密登录或人脸识别登录（人脸识别需要预先输入）" vertex="1">
+          <mxGeometry height="30" width="60" x="729" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="客户连接" vertex="1">
+          <mxGeometry height="30" width="60" x="389" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="登录后启动TCPserver服务" vertex="1">
+          <mxGeometry height="30" width="60" x="619" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-21" edge="1" parent="1" source="E3n8n1fjbyXGtovcH-07-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" target="E3n8n1fjbyXGtovcH-07-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-27" edge="1" parent="1" source="E3n8n1fjbyXGtovcH-07-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="E3n8n1fjbyXGtovcH-07-24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="客户端" vertex="1">
+          <mxGeometry height="60" width="120" x="129" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-20" edge="1" parent="1" source="E3n8n1fjbyXGtovcH-07-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="E3n8n1fjbyXGtovcH-07-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-28" edge="1" parent="1" source="E3n8n1fjbyXGtovcH-07-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="E3n8n1fjbyXGtovcH-07-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-16" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="商家端（服务器）" vertex="1">
+          <mxGeometry height="60" width="120" x="589" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="向客户端提供菜品数据" vertex="1">
+          <mxGeometry height="30" width="60" x="389" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-22" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="请求菜品数据（名称、图片、价格等）" vertex="1">
+          <mxGeometry height="30" width="60" x="389" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-23" edge="1" parent="1" source="E3n8n1fjbyXGtovcH-07-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" target="E3n8n1fjbyXGtovcH-07-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-24" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="客户端" vertex="1">
+          <mxGeometry height="60" width="120" x="129" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-25" edge="1" parent="1" source="E3n8n1fjbyXGtovcH-07-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="E3n8n1fjbyXGtovcH-07-24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-26" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="商家端（服务器）" vertex="1">
+          <mxGeometry height="60" width="120" x="589" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-31" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="订单提交（桌号、人数、所点菜品）" vertex="1">
+          <mxGeometry height="30" width="60" x="389" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="E3n8n1fjbyXGtovcH-07-32" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="订单完成提示" vertex="1">
+          <mxGeometry height="30" width="60" x="389" y="360" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
