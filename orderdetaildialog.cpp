@@ -5,30 +5,31 @@ OrderDetailDialog::OrderDetailDialog(const Order &order, QWidget *parent)
     : QDialog(parent)
     , m_order(order)
 {
+    // 设置窗口标题、大小、模态属性
     setWindowTitle("订单详情");
     setFixedSize(600, 400);
     setModal(true);
 
-    setupUI();
-    populateTable();
+    setupUI(); // 设置UI
+    populateTable(); // 填充表格
 }
 
-void OrderDetailDialog::setupUI()
+void OrderDetailDialog::setupUI() // 设置UI
 {
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(15, 15, 15, 15);
-    mainLayout->setSpacing(10);
+    QVBoxLayout *mainLayout = new QVBoxLayout(this); // 创建主布局
+    mainLayout->setContentsMargins(15, 15, 15, 15); // 设置主布局的边距
+    mainLayout->setSpacing(10); // 设置主布局的间距
 
-    QString titleText = QString("订单号：%1    用户：%2")
+    QString titleText = QString("订单号：%1    用户：%2") // 创建标题文本
                        .arg(m_order.getOrderNo())
-                       .arg(m_order.getUsername());
-    if (!m_order.getTableNumber().isEmpty()) {
+                       .arg(m_order.getUsername()); // 获取订单号和用户名
+    if (!m_order.getTableNumber().isEmpty()) { // 如果桌号不为空，则添加桌号
         titleText += QString("    桌号：%1").arg(m_order.getTableNumber());
     }
-    if (m_order.getCustomerCount() > 0) {
+    if (m_order.getCustomerCount() > 0) { // 如果客户人数大于0，则添加客户人数
         titleText += QString("    人数：%1").arg(m_order.getCustomerCount());
     }
-    QLabel *titleLabel = new QLabel(titleText, this);
+    QLabel *titleLabel = new QLabel(titleText, this); // 创建标题标签
     QFont titleFont = titleLabel->font();
     titleFont.setPointSize(12);
     titleFont.setBold(true);
@@ -80,9 +81,11 @@ void OrderDetailDialog::setupUI()
 
 void OrderDetailDialog::populateTable()
 {
+    // 填充表格
     const QVector<OrderItem> items = m_order.getItems();
     m_table->setRowCount(items.size());
 
+    // 遍历订单项
     for (int i = 0; i < items.size(); ++i) {
         const OrderItem &item = items[i];
         const Dish &dish = item.getDish();
@@ -103,10 +106,10 @@ void OrderDetailDialog::populateTable()
         }
     }
 
-    double total = m_order.getTotalAmount();
+    double total = m_order.getTotalAmount(); // 获取总金额
     m_totalLabel->setText(QString("总计：¥%1").arg(total, 0, 'f', 2));
 
-    m_table->resizeColumnsToContents();
-    m_table->setColumnWidth(0, 200);
+    m_table->resizeColumnsToContents(); // 调整列宽
+    m_table->setColumnWidth(0, 200); // 设置第一列的宽度
 }
 

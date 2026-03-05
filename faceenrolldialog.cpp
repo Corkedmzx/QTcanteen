@@ -127,9 +127,9 @@ void FaceEnrollDialog::setupUI()
     
     mainLayout->addWidget(videoContainer, 1);
     
-    // 创建定时器用于实时人脸检测
+    // 创建定时器用于实时人脸检测（较低频率，不影响视频流显示）
     m_faceDetectionTimer = new QTimer(this);
-    m_faceDetectionTimer->setInterval(200);  // 初始间隔200ms，跟踪时会动态调整
+    m_faceDetectionTimer->setInterval(100);  // 检测间隔100ms，与视频流显示分离
     connect(m_faceDetectionTimer, &QTimer::timeout, this, &FaceEnrollDialog::onFaceDetectionTimer);
 
     // 按钮区域（添加间距，避免与显示区域重叠）
@@ -184,6 +184,9 @@ void FaceEnrollDialog::startCamera()
     // 创建 QVideoSink 用于获取视频帧
     m_videoSink = new QVideoSink(this);
     m_captureSession->setVideoOutput(m_videoSink);
+    
+    // 连接视频帧变化信号，用于快速更新视频流显示
+    connect(m_videoSink, &QVideoSink::videoFrameChanged, this, &FaceEnrollDialog::onVideoFrameChanged);
 
     connect(m_imageCapture, &QImageCapture::imageCaptured, this, &FaceEnrollDialog::onImageCaptured);
     connect(m_camera, &QCamera::errorOccurred, this, &FaceEnrollDialog::onCameraError);
@@ -340,6 +343,60 @@ void FaceEnrollDialog::onImageCaptured(int id, const QImage &image)
     QMessageBox::information(this, "提示", "图像已捕获，请确认后点击保存！");
 }
 
+void FaceEnrollDialog::onVideoFrameChanged()
+{
+    // 快速更新视频流显示，不进行检测处理（保证流畅度）
+    if (!m_videoSink || !m_videoLabel) {
+        return;
+    }
+    
+    // 如果已经捕获图像或预览标签显示，不更新视频流
+    if (m_hasCaptured || (m_previewLabel && m_previewLabel->isVisible())) {
+        return;
+    }
+    
+    // 从 QVideoSink 获取当前视频帧
+    QVideoFrame frame = m_videoSink->videoFrame();
+    if (!frame.isValid()) {
+        return;
+    }
+    
+    // 将 QVideoFrame 转换为 QImage（快速转换，不进行格式优化）
+    QImage image = frame.toImage();
+    if (image.isNull() || image.width() <= 0 || image.height() <= 0) {
+        return;
+    }
+    
+    // 如果有缓存的带检测框的pixmap，使用它；否则使用原始视频帧
+    QPixmap pixmap;
+    if (!m_cachedPixmap.isNull() && !m_lastDrawnFaceRect.isEmpty()) {
+        // 使用缓存的带检测框的图像
+        pixmap = m_cachedPixmap;
+    } else {
+        // 使用原始视频帧
+        pixmap = QPixmap::fromImage(image);
+    }
+    
+    // 缓存标签尺寸，避免每次都获取
+    QSize labelSize = m_videoLabel->size();
+    if (labelSize != m_cachedLabelSize) {
+        m_cachedLabelSize = labelSize;
+        // 尺寸变化时，清除缓存
+        m_cachedPixmap = QPixmap();
+    }
+    
+    // 只在尺寸有效时进行缩放
+    if (m_cachedLabelSize.width() > 0 && m_cachedLabelSize.height() > 0) {
+        // 使用快速缩放算法，保证流畅度
+        if (pixmap.size() != m_cachedLabelSize) {
+            pixmap = pixmap.scaled(m_cachedLabelSize, Qt::KeepAspectRatio, Qt::FastTransformation);
+        }
+    }
+    
+    // 更新显示（这是唯一会阻塞UI的地方，但已经优化到最快）
+    m_videoLabel->setPixmap(pixmap);
+}
+
 void FaceEnrollDialog::onFaceDetectionTimer()
 {
     // 如果已经捕获图像或预览标签显示，不进行实时检测
@@ -385,17 +442,17 @@ void FaceEnrollDialog::onFaceDetectionTimer()
             faceDetected = true;
             m_trackerFailCount = 0;
             needDraw = true;
-            // 跟踪成功，使用更短的间隔（100ms）以获得更流畅的体验
-            if (m_faceDetectionTimer->interval() != 100) {
-                m_faceDetectionTimer->setInterval(100);
+            // 跟踪成功，使用更短的间隔（50ms）以获得更流畅的体验，提高跟踪响应速度
+            if (m_faceDetectionTimer->interval() != 50) {
+                m_faceDetectionTimer->setInterval(50);
             }
         } else {
             // Tracker 更新失败，增加失败计数
             m_trackerFailCount++;
             m_trackerInitialized = false;
             
-            // 如果连续失败次数过多，重新检测
-            if (m_trackerFailCount >= 3) {
+            // 如果连续失败次数过多，重新检测（降低阈值从3到2，更快响应）
+            if (m_trackerFailCount >= 2) {
                 m_trackerFailCount = 0;
                 // 重新进行人脸检测（需要格式转换）
                 if (image.format() != QImage::Format_RGB32 && image.format() != QImage::Format_ARGB32) {
@@ -408,9 +465,9 @@ void FaceEnrollDialog::onFaceDetectionTimer()
                     m_trackerInitialized = m_faceRecognizer->initTracker(image, faceRect);
                     needDraw = true;
                 }
-                // 检测时使用更长的间隔（300ms）以减少CPU占用
-                if (m_faceDetectionTimer->interval() != 300) {
-                    m_faceDetectionTimer->setInterval(300);
+                // 检测时使用中等间隔（200ms），平衡性能和响应速度
+                if (m_faceDetectionTimer->interval() != 200) {
+                    m_faceDetectionTimer->setInterval(200);
                 }
             } else {
                 // 暂时使用上一次的位置
@@ -432,9 +489,9 @@ void FaceEnrollDialog::onFaceDetectionTimer()
             m_trackerFailCount = 0;
             needDraw = true;
         }
-        // 检测时使用更长的间隔（300ms）
-        if (m_faceDetectionTimer->interval() != 300) {
-            m_faceDetectionTimer->setInterval(300);
+        // 检测时使用中等间隔（200ms），平衡性能和响应速度
+        if (m_faceDetectionTimer->interval() != 200) {
+            m_faceDetectionTimer->setInterval(200);
         }
     }
 #else
@@ -461,8 +518,9 @@ void FaceEnrollDialog::onFaceDetectionTimer()
             image = image.convertToFormat(QImage::Format_RGB32);
         }
         
-        // 直接在视频帧上绘制检测框
-        QPainter painter(&image);
+        // 在视频帧上绘制检测框（创建带检测框的图像）
+        QImage imageWithBox = image.copy();
+        QPainter painter(&imageWithBox);
         painter.setRenderHint(QPainter::Antialiasing);
         
         // 绘制粗绿色边框（4像素宽，更明显）
@@ -481,9 +539,15 @@ void FaceEnrollDialog::onFaceDetectionTimer()
         painter.setPen(QPen(QColor(0, 255, 0), 2));
         painter.setFont(QFont("Arial", 12, QFont::Bold));
         painter.drawText(textRect, Qt::AlignCenter, "检测到人脸");
+        
+        // 缓存带检测框的pixmap，供onVideoFrameChanged使用
+        m_cachedPixmap = QPixmap::fromImage(imageWithBox);
+        m_lastDrawnFaceRect = faceRect;
     } else {
-        // 未检测到人脸，重置状态
+        // 未检测到人脸，清除缓存
         m_currentFaceRect = QRect();
+        m_cachedPixmap = QPixmap();
+        m_lastDrawnFaceRect = QRect();
         m_trackerInitialized = false;
         m_trackerFailCount = 0;
 #ifndef SEETAFACE_AVAILABLE
@@ -493,23 +557,7 @@ void FaceEnrollDialog::onFaceDetectionTimer()
 #endif
     }
     
-    // 将绘制好的图像显示到 m_videoLabel
-    // 使用更快的缩放算法（FastTransformation）提升性能
-    QPixmap pixmap = QPixmap::fromImage(image);
-    
-    // 缓存标签尺寸，避免每次都获取
-    QSize labelSize = m_videoLabel->size();
-    if (labelSize != m_cachedLabelSize) {
-        m_cachedLabelSize = labelSize;
-    }
-    
-    if (m_cachedLabelSize.width() > 0 && m_cachedLabelSize.height() > 0) {
-        // 使用快速缩放算法，牺牲一点质量换取性能
-        pixmap = pixmap.scaled(m_cachedLabelSize, Qt::KeepAspectRatio, Qt::FastTransformation);
-    }
-    m_videoLabel->setPixmap(pixmap);
-    
-    // 处理完成
+    // 处理完成（不再在这里更新显示，由onVideoFrameChanged负责）
     m_processingFrame = false;
 }
 

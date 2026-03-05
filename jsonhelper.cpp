@@ -5,12 +5,12 @@
 #include <QDate>
 #include <QDateTime>
 
-QString JsonHelper::getUserFilePath()
+QString JsonHelper::getUserFilePath() // 获取用户文件路径
 {
     return "user.json";
 }
 
-QString JsonHelper::getDishFilePath()
+QString JsonHelper::getDishFilePath() // 获取菜品文件路径
 {
     return "dishes.json";
 }
@@ -20,8 +20,9 @@ QString JsonHelper::getOrderFilePath()
     return "orders.json";
 }
 
-bool JsonHelper::saveFaceData(const QString &username, const QString &faceImagePath)
+bool JsonHelper::saveFaceData(const QString &username, const QString &faceImagePath) // 保存人脸数据
 {
+    // 获取用户文件路径
     const QString filePath = getUserFilePath();
     QFile file(filePath);
     QJsonObject users;
@@ -40,116 +41,118 @@ bool JsonHelper::saveFaceData(const QString &username, const QString &faceImageP
         return false; // 用户不存在
     }
 
-    QJsonObject userObj = users[username].toObject();
-    userObj["faceImagePath"] = faceImagePath;
-    users[username] = userObj;
+    QJsonObject userObj = users[username].toObject(); // 获取用户对象
+    userObj["faceImagePath"] = faceImagePath; // 设置人脸图像路径
+    users[username] = userObj; // 设置用户对象
 
     // 保存前先备份旧文件
     if (QFile::exists(filePath)) {
-        const QString backupPath = filePath + ".bak";
-        QFile::remove(backupPath);
-        QFile::copy(filePath, backupPath);
+        const QString backupPath = filePath + ".bak"; // 获取备份文件路径
+        QFile::remove(backupPath); // 删除备份文件
+        QFile::copy(filePath, backupPath); // 复制文件到备份文件
     }
 
     // 保存到文件
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        QJsonDocument doc(users);
-        file.write(doc.toJson());
-        file.close();
-        return true;
+        QJsonDocument doc(users); // 创建JSON文档
+        file.write(doc.toJson()); // 写入JSON数据
+        file.close(); // 关闭文件
+        return true; // 返回true
     }
     return false;
 }
 
-QString JsonHelper::loadFaceData(const QString &username)
+QString JsonHelper::loadFaceData(const QString &username) // 加载人脸数据
 {
+    // 获取用户文件路径
     const QString filePath = getUserFilePath();
     const QString backupPath = filePath + ".bak";
 
     auto loadFrom = [&](const QString &path, QJsonObject &usersOut) -> bool {
+        // 加载文件
         QFile f(path);
         if (!f.exists() || !f.open(QIODevice::ReadOnly)) {
-            return false;
+            return false; // 如果文件不存在或无法打开，则返回false
         }
-        QJsonDocument doc = QJsonDocument::fromJson(f.readAll());
-        f.close();
-        if (!doc.isObject()) {
-            return false;
+        QJsonDocument doc = QJsonDocument::fromJson(f.readAll()); // 读取JSON数据
+        f.close(); // 关闭文件
+        if (!doc.isObject()) { // 如果JSON数据不是对象，则返回false
+            return false; // 返回false
         }
-        usersOut = doc.object();
-        return true;
+        usersOut = doc.object(); // 设置用户对象
+        return true; // 返回true
     };
 
-    QJsonObject users;
-    if (!loadFrom(filePath, users)) {
-        if (!loadFrom(backupPath, users)) {
-            return QString();
+    QJsonObject users; // 创建用户对象
+    if (!loadFrom(filePath, users)) { // 如果加载文件失败，则加载备份文件
+        if (!loadFrom(backupPath, users)) { // 如果加载备份文件失败，则返回空字符串
+            return QString(); // 返回空字符串
         }
     }
 
-    if (!users.contains(username)) {
-        return QString();
+    if (!users.contains(username)) { // 如果用户不存在，则返回空字符串
+        return QString(); // 返回空字符串
     }
 
-    QJsonObject userObj = users[username].toObject();
-    return userObj["faceImagePath"].toString();
+    QJsonObject userObj = users[username].toObject(); // 获取用户对象
+    return userObj["faceImagePath"].toString(); // 返回人脸图像路径
 }
 
-bool JsonHelper::hasFaceData(const QString &username)
+bool JsonHelper::hasFaceData(const QString &username) // 检查是否有任何人脸数据
 {
-    QString facePath = loadFaceData(username);
-    return !facePath.isEmpty() && QFile::exists(facePath);
+    QString facePath = loadFaceData(username); // 加载人脸数据
+    return !facePath.isEmpty() && QFile::exists(facePath); // 返回是否有人脸数据
 }
 
-bool JsonHelper::hasAnyFaceData()
+bool JsonHelper::hasAnyFaceData() // 检查是否有任何人脸数据
 {
-    const QString filePath = getUserFilePath();
-    const QString backupPath = filePath + ".bak";
+    const QString filePath = getUserFilePath(); // 获取用户文件路径
+    const QString backupPath = filePath + ".bak"; // 获取备份文件路径
 
     auto loadFrom = [&](const QString &path, QJsonObject &usersOut) -> bool {
-        QFile f(path);
+        QFile f(path); // 打开文件
         if (!f.exists() || !f.open(QIODevice::ReadOnly)) {
-            return false;
+            return false; // 如果文件不存在或无法打开，则返回false
         }
-        QJsonDocument doc = QJsonDocument::fromJson(f.readAll());
-        f.close();
-        if (!doc.isObject()) {
-            return false;
+        QJsonDocument doc = QJsonDocument::fromJson(f.readAll()); // 读取JSON数据
+        f.close(); // 关闭文件
+        if (!doc.isObject()) { // 如果JSON数据不是对象，则返回false
+            return false; // 返回false
         }
-        usersOut = doc.object();
+        usersOut = doc.object(); // 设置用户对象
         return true;
     };
 
-    QJsonObject users;
-    if (!loadFrom(filePath, users)) {
+    QJsonObject users; // 创建用户对象
+    if (!loadFrom(filePath, users)) { // 如果加载文件失败，则加载备份文件
         if (!loadFrom(backupPath, users)) {
-            return false;
+            return false; // 如果加载备份文件失败，则返回false
         }
     }
 
     // 检查是否有任何人脸数据
     for (auto it = users.begin(); it != users.end(); ++it) {
-        QJsonObject userObj = it.value().toObject();
-        QString faceImagePath = userObj["faceImagePath"].toString();
-        if (!faceImagePath.isEmpty() && QFile::exists(faceImagePath)) {
-            return true;
+        QJsonObject userObj = it.value().toObject(); // 获取用户对象
+        QString faceImagePath = userObj["faceImagePath"].toString(); // 获取人脸图像路径
+        if (!faceImagePath.isEmpty() && QFile::exists(faceImagePath)) { // 如果人脸图像路径不为空且文件存在，则返回true
+            return true; // 返回true
         }
     }
 
-    return false;
+    return false; // 返回false
 }
 
-bool JsonHelper::saveUser(const QString &username, const QString &password)
+bool JsonHelper::saveUser(const QString &username, const QString &password) // 保存用户
 {
-    const QString filePath = getUserFilePath();
-    QFile file(filePath);
-    QJsonObject users;
+    const QString filePath = getUserFilePath(); // 获取用户文件路径
+    QFile file(filePath); // 打开文件
+    QJsonObject users; // 创建用户对象
 
     // 读取现有用户
     if (file.exists() && file.open(QIODevice::ReadOnly)) {
-        QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+        QJsonDocument doc = QJsonDocument::fromJson(file.readAll()); // 读取JSON数据
         if (doc.isObject()) {
-            users = doc.object();
+            users = doc.object(); // 设置用户对象
         }
         file.close();
     }
@@ -175,6 +178,88 @@ bool JsonHelper::saveUser(const QString &username, const QString &password)
 
     // 保存到文件
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        QJsonDocument doc(users); // 创建JSON文档
+        file.write(doc.toJson()); // 写入JSON数据
+        file.close(); // 关闭文件
+        return true; // 返回true
+    }
+    return false; // 返回false
+}
+
+bool JsonHelper::loadUser(const QString &username, QString &password) // 加载用户
+{
+    const QString filePath = getUserFilePath(); // 获取用户文件路径
+    const QString backupPath = filePath + ".bak";
+
+    auto loadFrom = [&](const QString &path, QJsonObject &usersOut) -> bool {
+        QFile f(path); // 打开文件
+        if (!f.exists() || !f.open(QIODevice::ReadOnly)) {
+            return false; // 如果文件不存在或无法打开，则返回false
+        }
+        QJsonDocument doc = QJsonDocument::fromJson(f.readAll()); // 读取JSON数据
+        f.close(); // 关闭文件
+        if (!doc.isObject()) { // 如果JSON数据不是对象，则返回false
+            return false; // 返回false
+        }
+        usersOut = doc.object(); // 设置用户对象
+        return true; // 返回true
+    };
+
+    QJsonObject users; // 创建用户对象
+    // 优先尝试主文件，失败时尝试备份文件
+    if (!loadFrom(filePath, users)) {
+        if (!loadFrom(backupPath, users)) {
+            return false; // 如果加载备份文件失败，则返回false
+        }
+    }
+
+    if (!users.contains(username)) {
+        return false; // 如果用户不存在，则返回false
+    }
+
+    QJsonObject userObj = users[username].toObject(); // 获取用户对象
+    password = userObj["password"].toString();
+    return true; // 返回true
+}
+
+bool JsonHelper::userExists(const QString &username) // 检查用户是否存在
+{
+    QString password; // 创建密码字符串
+    return loadUser(username, password);
+}
+
+bool JsonHelper::deleteUser(const QString &username) // 删除用户
+{
+    const QString filePath = getUserFilePath(); // 获取用户文件路径 
+    QFile file(filePath); // 打开文件
+    QJsonObject users; // 创建用户对象
+
+    // 读取现有用户
+    if (file.exists() && file.open(QIODevice::ReadOnly)) {
+        QJsonDocument doc = QJsonDocument::fromJson(file.readAll()); // 读取JSON数据
+        if (doc.isObject()) {
+            users = doc.object(); // 设置用户对象
+        }
+        file.close();
+    }
+
+    // 检查用户是否存在
+    if (!users.contains(username)) {
+        return false; // 用户不存在
+    }
+
+    // 删除用户
+    users.remove(username);
+
+    // 保存前先备份旧文件
+    if (QFile::exists(filePath)) {
+        const QString backupPath = filePath + ".bak";
+        QFile::remove(backupPath);              // 删除旧备份
+        QFile::copy(filePath, backupPath);      // 复制为新备份
+    }
+
+    // 保存到文件
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         QJsonDocument doc(users);
         file.write(doc.toJson());
         file.close();
@@ -183,61 +268,19 @@ bool JsonHelper::saveUser(const QString &username, const QString &password)
     return false;
 }
 
-bool JsonHelper::loadUser(const QString &username, QString &password)
-{
-    const QString filePath = getUserFilePath();
-    const QString backupPath = filePath + ".bak";
-
-    auto loadFrom = [&](const QString &path, QJsonObject &usersOut) -> bool {
-        QFile f(path);
-        if (!f.exists() || !f.open(QIODevice::ReadOnly)) {
-            return false;
-        }
-        QJsonDocument doc = QJsonDocument::fromJson(f.readAll());
-        f.close();
-        if (!doc.isObject()) {
-            return false;
-        }
-        usersOut = doc.object();
-        return true;
-    };
-
-    QJsonObject users;
-    // 优先尝试主文件，失败时尝试备份文件
-    if (!loadFrom(filePath, users)) {
-        if (!loadFrom(backupPath, users)) {
-            return false;
-        }
-    }
-
-    if (!users.contains(username)) {
-        return false;
-    }
-
-    QJsonObject userObj = users[username].toObject();
-    password = userObj["password"].toString();
-    return true;
-}
-
-bool JsonHelper::userExists(const QString &username)
-{
-    QString password;
-    return loadUser(username, password);
-}
-
 void JsonHelper::initializeDefaultUsers()
 {
     // 只保证 admin 商家账号存在；如果用户文件存在，同时移除旧的 user 用户
     const QString filePath = getUserFilePath();
-    QFile file(filePath);
+    QFile file(filePath); // 打开文件
 
-    QJsonObject users;
+    QJsonObject users; // 创建用户对象
 
     if (file.exists() && file.open(QIODevice::ReadOnly)) {
-        QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-        file.close();
+        QJsonDocument doc = QJsonDocument::fromJson(file.readAll()); // 读取JSON数据
+        file.close(); // 关闭文件
         if (doc.isObject()) {
-            users = doc.object();
+            users = doc.object(); // 设置用户对象
         }
     }
 
@@ -267,13 +310,13 @@ void JsonHelper::initializeDefaultUsers()
     }
 }
 
-bool JsonHelper::saveDishes(const QVector<Dish> &dishes)
+bool JsonHelper::saveDishes(const QVector<Dish> &dishes) // 保存菜品
 {
-    const QString filePath = getDishFilePath();
-    QFile file(filePath);
+    const QString filePath = getDishFilePath(); // 获取菜品文件路径
+    QFile file(filePath); // 打开文件
     QJsonArray dishArray;
 
-    for (const Dish &dish : dishes) {
+    for (const Dish &dish : dishes) { // 遍历菜品
         QJsonObject dishObj;
         dishObj["id"] = dish.getId();
         dishObj["name"] = dish.getName();
@@ -284,28 +327,28 @@ bool JsonHelper::saveDishes(const QVector<Dish> &dishes)
         dishArray.append(dishObj);
     }
 
-    QJsonObject root;
+    QJsonObject root; // 创建菜品对象
     root["dishes"] = dishArray;
 
     // 保存前先备份旧文件
     if (QFile::exists(filePath)) {
         const QString backupPath = filePath + ".bak";
-        QFile::remove(backupPath);
-        QFile::copy(filePath, backupPath);
+        QFile::remove(backupPath); // 删除备份文件
+        QFile::copy(filePath, backupPath); // 复制文件到备份文件
     }
 
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         QJsonDocument doc(root);
-        file.write(doc.toJson());
-        file.close();
-        return true;
+        file.write(doc.toJson()); // 写入JSON数据
+        file.close(); // 关闭文件
+        return true; // 返回true
     }
-    return false;
+    return false; // 返回false
 }
 
-QVector<Dish> JsonHelper::loadDishes()
+QVector<Dish> JsonHelper::loadDishes() // 加载菜品
 {
-    QVector<Dish> dishes;
+    QVector<Dish> dishes; // 创建菜品对象
     const QString filePath = getDishFilePath();
     const QString backupPath = filePath + ".bak";
     QFile file(filePath);
@@ -352,17 +395,17 @@ QVector<Dish> JsonHelper::loadDishes()
             return dishes;
         }
 
-        QJsonDocument doc = QJsonDocument::fromJson(backupFile.readAll());
+        QJsonDocument doc = QJsonDocument::fromJson(backupFile.readAll()); // 读取JSON数据
         backupFile.close();
-        if (!doc.isObject()) {
+        if (!doc.isObject()) { // 如果JSON数据不是对象，则返回false
             return dishes;
         }
 
-        QJsonObject root = doc.object();
-        QJsonArray dishArray = root["dishes"].toArray();
+        QJsonObject root = doc.object(); // 设置菜品对象
+        QJsonArray dishArray = root["dishes"].toArray(); // 设置菜品数组
 
         for (int i = 0; i < dishArray.size(); ++i) {
-            const QJsonObject dishObj = dishArray.at(i).toObject();
+            const QJsonObject dishObj = dishArray.at(i).toObject(); // 获取菜品对象
             Dish dish;
             dish.setId(dishObj["id"].toInt());
             dish.setName(dishObj["name"].toString());
@@ -375,18 +418,18 @@ QVector<Dish> JsonHelper::loadDishes()
         return dishes;
     }
 
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll()); // 读取JSON数据
     file.close();
 
-    if (!doc.isObject()) {
+    if (!doc.isObject()) { // 如果JSON数据不是对象，则返回false
         return dishes;
     }
 
-    QJsonObject root = doc.object();
-    QJsonArray dishArray = root["dishes"].toArray();
+    QJsonObject root = doc.object(); // 设置菜品对象
+    QJsonArray dishArray = root["dishes"].toArray(); // 设置菜品数组
 
     for (int i = 0; i < dishArray.size(); ++i) {
-        const QJsonObject dishObj = dishArray.at(i).toObject();
+        const QJsonObject dishObj = dishArray.at(i).toObject(); // 获取菜品对象
         Dish dish;
         dish.setId(dishObj["id"].toInt());
         dish.setName(dishObj["name"].toString());
@@ -394,49 +437,49 @@ QVector<Dish> JsonHelper::loadDishes()
         dish.setPrice(dishObj["price"].toDouble());
         dish.setDescription(dishObj["description"].toString());
         dish.setImagePath(dishObj["imagePath"].toString());
-        dishes.append(dish);
+        dishes.append(dish); // 添加菜品
     }
 
-    return dishes;
+    return dishes; // 返回菜品对象
 }
 
 bool JsonHelper::addDish(const Dish &dish)
 {
-    QVector<Dish> dishes = loadDishes();
-    int maxId = 0;
+    QVector<Dish> dishes = loadDishes(); // 加载菜品
+    int maxId = 0; // 创建最大ID
     for (int i = 0; i < dishes.size(); ++i) {
         const Dish &d = dishes.at(i);
         if (d.getId() > maxId) {
             maxId = d.getId();
         }
     }
-    Dish newDish = dish;
-    newDish.setId(maxId + 1);
-    dishes.append(newDish);
-    return saveDishes(dishes);
+    Dish newDish = dish; // 创建新菜品
+    newDish.setId(maxId + 1); // 设置新菜品ID
+    dishes.append(newDish); // 添加新菜品
+    return saveDishes(dishes); // 保存菜品
 }
 
-bool JsonHelper::updateDish(int id, const Dish &dish)
+bool JsonHelper::updateDish(int id, const Dish &dish) // 更新菜品
 {
-    QVector<Dish> dishes = loadDishes();
+    QVector<Dish> dishes = loadDishes(); // 加载菜品
     for (int i = 0; i < dishes.size(); ++i) {
         if (dishes[i].getId() == id) {
-            Dish updatedDish = dish;
+            Dish updatedDish = dish; // 创建更新菜品
             updatedDish.setId(id);
-            dishes[i] = updatedDish;
+            dishes[i] = updatedDish; // 设置更新菜品
             return saveDishes(dishes);
         }
     }
     return false;
 }
 
-bool JsonHelper::deleteDish(int id)
+bool JsonHelper::deleteDish(int id) // 删除菜品
 {
-    QVector<Dish> dishes = loadDishes();
+    QVector<Dish> dishes = loadDishes(); // 加载菜品
     for (int i = 0; i < dishes.size(); ++i) {
         if (dishes[i].getId() == id) {
-            dishes.removeAt(i);
-            return saveDishes(dishes);
+            dishes.removeAt(i); // 删除菜品
+            return saveDishes(dishes); // 保存菜品
         }
     }
     return false;
@@ -444,140 +487,114 @@ bool JsonHelper::deleteDish(int id)
 
 QJsonObject JsonHelper::orderToJson(const QVector<OrderItem> &orderItems, const QString &username)
 {
-    QJsonObject orderObj;
-    orderObj["username"] = username;
-    QJsonArray itemsArray;
-
-    for (const OrderItem &item : orderItems) {
-        QJsonObject itemObj;
-        itemObj["dishId"] = item.getDish().getId();
-        itemObj["dishName"] = item.getDish().getName();
-        itemObj["quantity"] = item.getQuantity();
-        itemObj["price"] = item.getDish().getPrice();
-        itemsArray.append(itemObj);
+    // 将订单项转换为JSON对象
+    QJsonObject orderObj; // 创建订单对象
+    orderObj["username"] = username; // 设置用户名
+    QJsonArray itemsArray; // 创建订单项数组
+    for (const OrderItem &item : orderItems) { // 遍历订单项
+        QJsonObject itemObj; // 创建订单项对象
+        itemObj["dishId"] = item.getDish().getId(); // 设置菜品ID
+        itemObj["dishName"] = item.getDish().getName(); // 设置菜品名称
+        itemObj["quantity"] = item.getQuantity(); // 设置数量
+        itemObj["price"] = item.getDish().getPrice(); // 设置价格
+        itemsArray.append(itemObj); // 添加订单项对象
     }
-
-    orderObj["items"] = itemsArray;
-    return orderObj;
+    orderObj["items"] = itemsArray; // 设置订单项数组
+    return orderObj; // 返回订单对象
 }
 
-QVector<OrderItem> JsonHelper::jsonToOrder(const QJsonObject &json)
+bool JsonHelper::saveOrder(const Order &order) // 保存订单
 {
-    QVector<OrderItem> orderItems;
-    QJsonArray itemsArray = json["items"].toArray();
-
-    QVector<Dish> allDishes = loadDishes();
-
-    for (int i = 0; i < itemsArray.size(); ++i) {
-        const QJsonObject itemObj = itemsArray.at(i).toObject();
-        int dishId = itemObj["dishId"].toInt();
-        int quantity = itemObj["quantity"].toInt();
-
-        // 查找对应的菜品
-        for (int j = 0; j < allDishes.size(); ++j) {
-            const Dish &dish = allDishes.at(j);
-            if (dish.getId() == dishId) {
-                orderItems.append(OrderItem(dish, quantity));
-                break;
-            }
-        }
-    }
-
-    return orderItems;
-}
-
-bool JsonHelper::saveOrder(const Order &order)
-{
-    const QString filePath = getOrderFilePath();
-    QFile file(filePath);
-    QJsonArray orderArray;
+    const QString filePath = getOrderFilePath(); // 获取订单文件路径
+    QFile file(filePath); // 打开文件
+    QJsonArray orderArray; // 创建订单数组
 
     // 读取现有订单
     if (file.exists() && file.open(QIODevice::ReadOnly)) {
-        QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+        QJsonDocument doc = QJsonDocument::fromJson(file.readAll()); // 读取JSON数据
         if (doc.isObject()) {
-            QJsonObject root = doc.object();
+            QJsonObject root = doc.object(); // 设置订单对象
             orderArray = root["orders"].toArray();
         }
-        file.close();
+        file.close(); // 关闭文件
     }
 
     // 转换为JSON
-    QJsonObject orderObj;
-    orderObj["orderNo"] = order.getOrderNo();
-    orderObj["username"] = order.getUsername();
-    orderObj["tableNumber"] = order.getTableNumber();
-    orderObj["customerCount"] = order.getCustomerCount();
-    orderObj["status"] = order.getStatusString();
-    orderObj["createTime"] = order.getCreateTime().toString(Qt::ISODate);
+    QJsonObject orderObj; // 创建订单对象
+    orderObj["orderNo"] = order.getOrderNo(); // 设置订单号
+    orderObj["username"] = order.getUsername(); // 设置用户名
+    orderObj["tableNumber"] = order.getTableNumber(); // 设置桌号
+    orderObj["customerCount"] = order.getCustomerCount(); // 设置顾客数量
+    orderObj["status"] = order.getStatusString(); // 设置状态
+    orderObj["createTime"] = order.getCreateTime().toString(Qt::ISODate); // 设置创建时间
 
-    QJsonArray itemsArray;
+    QJsonArray itemsArray; // 创建订单项数组
     for (const OrderItem &item : order.getItems()) {
-        QJsonObject itemObj;
-        itemObj["dishId"] = item.getDish().getId();
-        itemObj["dishName"] = item.getDish().getName();
-        itemObj["quantity"] = item.getQuantity();
-        itemObj["price"] = item.getDish().getPrice();
-        itemsArray.append(itemObj);
+        QJsonObject itemObj; // 创建订单项对象
+        itemObj["dishId"] = item.getDish().getId(); // 设置菜品ID
+        itemObj["dishName"] = item.getDish().getName(); // 设置菜品名称
+        itemObj["quantity"] = item.getQuantity(); // 设置数量
+        itemObj["price"] = item.getDish().getPrice(); // 设置价格
+        itemsArray.append(itemObj); // 添加订单项对象
     }
-    orderObj["items"] = itemsArray;
+    orderObj["items"] = itemsArray; // 设置订单项数组
 
     // 检查是否已存在，如果存在则更新，否则添加
     bool found = false;
     for (int i = 0; i < orderArray.size(); ++i) {
-        const QJsonObject existing = orderArray[i].toObject();
+        const QJsonObject existing = orderArray[i].toObject(); // 获取订单对象
         const QString existingOrderNo = existing.contains("orderNo")
                                             ? existing["orderNo"].toString()
-                                            : QString();
+                                            : QString(); // 获取订单号
         if (!existingOrderNo.isEmpty() && existingOrderNo == order.getOrderNo()) {
-            orderArray[i] = orderObj;
-            found = true;
+            orderArray[i] = orderObj; // 设置订单对象
+            found = true; // 设置已找到
             break;
         }
     }
     if (!found) {
-        orderArray.append(orderObj);
+        orderArray.append(orderObj); // 添加订单对象
     }
 
     // 保存到文件前先备份旧文件
     if (QFile::exists(filePath)) {
-        const QString backupPath = filePath + ".bak";
-        QFile::remove(backupPath);
-        QFile::copy(filePath, backupPath);
+        const QString backupPath = filePath + ".bak"; // 获取备份文件路径
+        QFile::remove(backupPath); // 删除备份文件
+        QFile::copy(filePath, backupPath); // 复制文件到备份文件
     }
 
-    QJsonObject root;
-    root["orders"] = orderArray;
+    QJsonObject root; // 创建订单对象
+    root["orders"] = orderArray; // 设置订单数组
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        QJsonDocument doc(root);
-        file.write(doc.toJson());
-        file.close();
+        QJsonDocument doc(root); // 创建JSON文档
+        file.write(doc.toJson()); // 写入JSON数据
+        file.close(); // 关闭文件
         return true;
     }
     return false;
 }
 
-QVector<Order> JsonHelper::loadOrders()
+QVector<Order> JsonHelper::loadOrders() // 加载订单
 {
-    QVector<Order> orders;
-    const QString filePath = getOrderFilePath();
-    const QString backupPath = filePath + ".bak";
-    QFile file(filePath);
+    QVector<Order> orders; // 创建订单对象
+    const QString filePath = getOrderFilePath(); // 获取订单文件路径
+    const QString backupPath = filePath + ".bak"; // 获取备份文件路径
+    QFile file(filePath); // 打开文件
 
-    if (!file.exists()) {
+    if (!file.exists()) { // 如果文件不存在，则返回false
         return orders;
     }
 
     auto parseOrders = [&](QIODevice &device, QJsonObject &rootOut) -> bool {
-        QJsonDocument doc = QJsonDocument::fromJson(device.readAll());
-        if (!doc.isObject()) {
+        QJsonDocument doc = QJsonDocument::fromJson(device.readAll()); // 读取JSON数据
+        if (!doc.isObject()) { // 如果JSON数据不是对象，则返回false
             return false;
         }
-        rootOut = doc.object();
+        rootOut = doc.object(); // 设置订单对象
         return true;
     };
 
-    QJsonObject root;
+    QJsonObject root; // 创建订单对象
 
     // 先尝试主文件
     if (file.open(QIODevice::ReadOnly)) {
@@ -599,12 +616,12 @@ QVector<Order> JsonHelper::loadOrders()
         backupFile.close();
     }
 
-    QJsonArray orderArray = root["orders"].toArray();
+    QJsonArray orderArray = root["orders"].toArray(); // 获取订单数组
 
-    QVector<Dish> allDishes = loadDishes();
+    QVector<Dish> allDishes = loadDishes(); // 加载菜品
 
     for (int i = 0; i < orderArray.size(); ++i) {
-        const QJsonObject orderObj = orderArray.at(i).toObject();
+        const QJsonObject orderObj = orderArray.at(i).toObject(); // 获取订单对象
         Order order;
         // 兼容旧字段：id(int)
         QString orderNo = orderObj.contains("orderNo") ? orderObj["orderNo"].toString() : QString();
@@ -649,7 +666,7 @@ QVector<Order> JsonHelper::loadOrders()
     return orders;
 }
 
-bool JsonHelper::updateOrderStatus(const QString &orderNo, OrderStatus status)
+bool JsonHelper::updateOrderStatus(const QString &orderNo, OrderStatus status) // 更新订单状态
 {
     QVector<Order> orders = loadOrders();
     for (int i = 0; i < orders.size(); ++i) {
@@ -661,7 +678,7 @@ bool JsonHelper::updateOrderStatus(const QString &orderNo, OrderStatus status)
     return false;
 }
 
-QString JsonHelper::getNextOrderNo(const QDate &date)
+QString JsonHelper::getNextOrderNo(const QDate &date) // 获取下一个订单号
 {
     QVector<Order> orders = loadOrders();
     const QString mmdd = date.toString("MMdd");
@@ -680,7 +697,7 @@ QString JsonHelper::getNextOrderNo(const QDate &date)
     return mmdd + QString("%1").arg(nextSeq, 3, 10, QChar('0'));
 }
 
-bool JsonHelper::deleteCompletedOrders()
+bool JsonHelper::deleteCompletedOrders() // 删除已完成订单
 {
     const QString filePath = getOrderFilePath();
     QFile file(filePath);

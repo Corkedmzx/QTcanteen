@@ -16,6 +16,7 @@ public:
     static bool saveUser(const QString &username, const QString &password);
     static bool loadUser(const QString &username, QString &password);
     static bool userExists(const QString &username);
+    static bool deleteUser(const QString &username);
     static void initializeDefaultUsers();
     
     // 人脸识别相关
@@ -33,7 +34,6 @@ public:
 
     // 订单相关
     static QJsonObject orderToJson(const QVector<OrderItem> &orderItems, const QString &username);
-    static QVector<OrderItem> jsonToOrder(const QJsonObject &json);
     static bool saveOrder(const Order &order);
     static QVector<Order> loadOrders();
     static bool updateOrderStatus(const QString &orderNo, OrderStatus status);

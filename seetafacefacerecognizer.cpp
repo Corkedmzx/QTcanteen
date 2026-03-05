@@ -33,13 +33,13 @@ const QString SeetaFaceRecognizer::DEFAULT_MODEL_PATH = "models";
 static bool g_tennis_initialized = false;
 static QMutex g_tennis_init_mutex;
 
-SeetaFaceRecognizer::SeetaFaceRecognizer()
+SeetaFaceRecognizer::SeetaFaceRecognizer() // 构造函数
     : m_initialized(false)
 {
 #ifdef SEETAFACE_ENABLED
-    m_detector = nullptr;
-    m_landmarker = nullptr;
-    m_recognizer = nullptr;
+    m_detector = nullptr; // 将检测器设置为空
+    m_landmarker = nullptr; // 将关键点检测器设置为空
+    m_recognizer = nullptr; // 将识别器设置为空
     
     // 默认模型文件路径查找顺序：
     // 1. 可执行文件目录下的 models 子目录
@@ -79,51 +79,51 @@ SeetaFaceRecognizer::SeetaFaceRecognizer()
     qWarning() << "SeetaFace 未启用！请在 CMakeLists.txt 中配置 SEETAFACE_ROOT";
 #endif
     
-    m_modelPath = "seetaface_model.json";
+    m_modelPath = "seetaface_model.json"; // 将模型路径设置为seetaface_model.json
 }
 
-SeetaFaceRecognizer::~SeetaFaceRecognizer()
+SeetaFaceRecognizer::~SeetaFaceRecognizer() // 析构函数
 {
 #ifdef SEETAFACE_ENABLED
     if (m_initialized) {
-        saveModel();
+        saveModel(); // 保存模型
     }
     
-    if (m_detector) {
+    if (m_detector) { // 如果检测器不为空，则释放检测器
         delete m_detector;
         m_detector = nullptr;
     }
     
     if (m_landmarker) {
-        delete m_landmarker;
+        delete m_landmarker; // 释放关键点检测器
         m_landmarker = nullptr;
     }
     
     if (m_recognizer) {
-        delete m_recognizer;
+        delete m_recognizer; // 释放识别器
         m_recognizer = nullptr;
     }
 #endif
 }
 
-bool SeetaFaceRecognizer::initialize(const QString &modelPath)
+bool SeetaFaceRecognizer::initialize(const QString &modelPath) // 初始化识别器
 {
 #ifdef SEETAFACE_ENABLED
     if (m_initialized) {
-        qWarning() << "SeetaFace 已经初始化";
+        qWarning() << "SeetaFace 已经初始化"; // 如果已经初始化，则返回true
         return true;
     }
     
     // 确保 TenniS 只初始化一次（线程安全）
     {
-        QMutexLocker locker(&g_tennis_init_mutex);
+        QMutexLocker locker(&g_tennis_init_mutex); // 锁定互斥锁
         if (!g_tennis_initialized) {
-            qDebug() << "初始化 TenniS（全局单次初始化）...";
+            qDebug() << "初始化 TenniS（全局单次初始化）..."; // 初始化 TenniS（全局单次初始化）
             if (!ts_setup()) {
-                qCritical() << "TenniS 初始化失败！";
+                qCritical() << "TenniS 初始化失败！"; // 如果初始化失败，则返回false
                 return false;
             }
-            g_tennis_initialized = true;
+            g_tennis_initialized = true; // 将Tennis初始化标志设置为true
             qDebug() << "TenniS 全局初始化成功";
         } else {
             qDebug() << "TenniS 已经初始化（跳过）";
@@ -172,12 +172,12 @@ bool SeetaFaceRecognizer::initialize(const QString &modelPath)
         }
         
         if (QFile::exists(altDetectorPath) && QFile::exists(altLandmarkerPath) && QFile::exists(altRecognizerPath)) {
-            m_detectorModelPath = altDetectorPath;
-            m_landmarkerModelPath = altLandmarkerPath;
-            m_recognizerModelPath = altRecognizerPath;
+            m_detectorModelPath = altDetectorPath; // 将检测器模型路径设置为altDetectorPath
+            m_landmarkerModelPath = altLandmarkerPath; // 将关键点模型路径设置为altLandmarkerPath
+            m_recognizerModelPath = altRecognizerPath; // 将识别器模型路径设置为altRecognizerPath
             qDebug() << "找到模型文件在：" << seetaFaceModelsDir;
         } else {
-            qWarning() << "请确保模型文件在以下位置之一：";
+            qWarning() << "请确保模型文件在以下位置之一："; // 如果模型文件不存在，则返回false
             qWarning() << "  1. " << QCoreApplication::applicationDirPath() << "/models/";
             qWarning() << "  2. models/ (当前工作目录)";
             qWarning() << "  3. " << seetaFaceModelsDir;
@@ -262,7 +262,7 @@ bool SeetaFaceRecognizer::initialize(const QString &modelPath)
         
         // 使用构造函数直接初始化（推荐方式）
         // 注意：确保路径字符串在 ModelSetting 对象生命周期内有效
-        seeta::ModelSetting detectorSetting;
+        seeta::ModelSetting detectorSetting; // 创建检测器模型设置
         try {
             detectorSetting = seeta::ModelSetting(detectorPathStr, seeta::ModelSetting::CPU);
             qDebug() << "detectorSetting 创建成功";
@@ -271,7 +271,7 @@ bool SeetaFaceRecognizer::initialize(const QString &modelPath)
             return false;
         }
         
-        seeta::ModelSetting landmarkerSetting;
+        seeta::ModelSetting landmarkerSetting; // 创建关键点模型设置
         try {
             landmarkerSetting = seeta::ModelSetting(landmarkerPathStr, seeta::ModelSetting::CPU);
             qDebug() << "landmarkerSetting 创建成功";
@@ -280,7 +280,7 @@ bool SeetaFaceRecognizer::initialize(const QString &modelPath)
             return false;
         }
         
-        seeta::ModelSetting recognizerSetting;
+        seeta::ModelSetting recognizerSetting; // 创建识别器模型设置
         try {
             recognizerSetting = seeta::ModelSetting(recognizerPathStr, seeta::ModelSetting::CPU);
             qDebug() << "recognizerSetting 创建成功";
@@ -476,37 +476,37 @@ bool SeetaFaceRecognizer::initialize(const QString &modelPath)
 #endif
 }
 
-seeta::SeetaImageData SeetaFaceRecognizer::qImageToSeetaImageData(const QImage &image)
+seeta::SeetaImageData SeetaFaceRecognizer::qImageToSeetaImageData(const QImage &image) // 将QImage转换为SeetaImageData
 {
 #ifdef SEETAFACE_ENABLED
-    QImage img = image.convertToFormat(QImage::Format_RGB888);
+    QImage img = image.convertToFormat(QImage::Format_RGB888); // 将图像转换为RGB888格式
     
-    seeta::SeetaImageData seetaImg;
-    seetaImg.width = img.width();
-    seetaImg.height = img.height();
+    seeta::SeetaImageData seetaImg; // 创建SeetaImageData
+    seetaImg.width = img.width(); // 设置图像宽度
+    seetaImg.height = img.height(); // 设置图像高度
     seetaImg.channels = 3;
-    seetaImg.data = const_cast<unsigned char*>(img.bits());
+    seetaImg.data = const_cast<unsigned char*>(img.bits()); // 设置图像数据
     
     return seetaImg;
 #else
-    seeta::SeetaImageData seetaImg = {0};
+    seeta::SeetaImageData seetaImg = {0}; // 创建SeetaImageData
     return seetaImg;
 #endif
 }
 
-bool SeetaFaceRecognizer::detectFace(const QImage &image, QRect &faceRect)
+bool SeetaFaceRecognizer::detectFace(const QImage &image, QRect &faceRect) // 检测人脸
 {
 #ifdef SEETAFACE_ENABLED
-    if (!m_initialized || !m_detector) {
+    if (!m_initialized || !m_detector) { // 如果未初始化或检测器为空，则返回false
         qWarning() << "SeetaFace 未初始化";
         return false;
     }
     
-    if (image.isNull()) {
+    if (image.isNull()) { // 如果图像为空，则返回false
         return false;
     }
     
-    seeta::SeetaImageData seetaImg = qImageToSeetaImageData(image);
+    seeta::SeetaImageData seetaImg = qImageToSeetaImageData(image); // 将图像转换为SeetaImageData
     
     // 检测人脸
     auto faces = m_detector->detect_v2(seetaImg);
@@ -525,6 +525,7 @@ bool SeetaFaceRecognizer::detectFace(const QImage &image, QRect &faceRect)
         }
     }
     
+    // 设置人脸矩形
     faceRect = QRect(largestFace.x, largestFace.y, largestFace.width, largestFace.height);
     return true;
 #else
@@ -534,13 +535,12 @@ bool SeetaFaceRecognizer::detectFace(const QImage &image, QRect &faceRect)
 #endif
 }
 
-QImage SeetaFaceRecognizer::preprocessImage(const QImage &image)
+QImage SeetaFaceRecognizer::preprocessImage(const QImage &image) // 预处理图像
 {
     // 转换为 RGB 格式
     QImage processed = image.convertToFormat(QImage::Format_RGB888);
     
-    // 可以在这里添加其他预处理步骤，如尺寸调整、直方图均衡化等
-    // 但 SeetaFace 通常不需要太多预处理
+    // 在这里添加其他预处理步骤，如尺寸调整、直方图均衡化等
     
     return processed;
 }
@@ -627,59 +627,59 @@ double SeetaFaceRecognizer::detectOcclusion(const QImage &image, const QRect &fa
         }
     }
     
-    return std::max(0.0, std::min(1.0, occlusionRatio));
+    return std::max(0.0, std::min(1.0, occlusionRatio)); // 返回遮挡比例
 #else
-    Q_UNUSED(image);
-    Q_UNUSED(faceRect);
+    Q_UNUSED(image); // 如果SeetaFace未启用，则返回0.0
+    Q_UNUSED(faceRect); // 如果SeetaFace未启用，则返回0.0
     return 0.0;
 #endif
 }
 
-bool SeetaFaceRecognizer::train(const QString &username, const QImage &faceImage)
+bool SeetaFaceRecognizer::train(const QString &username, const QImage &faceImage) // 训练识别器
 {
 #ifdef SEETAFACE_ENABLED
-    if (!m_initialized || !m_recognizer || !m_landmarker) {
+    if (!m_initialized || !m_recognizer || !m_landmarker) { // 如果未初始化或识别器或关键点检测器为空，则返回false
         qWarning() << "SeetaFace 未初始化";
         return false;
     }
     
-    if (faceImage.isNull()) {
+    if (faceImage.isNull()) { // 如果图像为空，则返回false
         return false;
     }
     
     // 使用原始图像进行检测（不裁剪，保持完整图像上下文）
-    seeta::SeetaImageData seetaImg = qImageToSeetaImageData(faceImage);
+    seeta::SeetaImageData seetaImg = qImageToSeetaImageData(faceImage); // 将图像转换为SeetaImageData
     
     // 检测人脸（在完整图像上检测，更准确）
-    auto faces = m_detector->detect_v2(seetaImg);
+    auto faces = m_detector->detect_v2(seetaImg); // 检测人脸
     if (faces.empty()) {
         qWarning() << "未检测到人脸";
         return false;
     }
     
     // 选择最大的人脸（通常是最主要的人脸）
-    seeta::SeetaFaceInfo largestFace = faces[0];
+    seeta::SeetaFaceInfo largestFace = faces[0]; // 选择最大的人脸
     for (size_t i = 1; i < faces.size(); ++i) {
         int area1 = largestFace.pos.width * largestFace.pos.height;
         int area2 = faces[i].pos.width * faces[i].pos.height;
         if (area2 > area1) {
-            largestFace = faces[i];
+            largestFace = faces[i]; // 选择最大的人脸
         }
     }
     
     // 获取关键点（使用完整图像和检测到的人脸位置）
-    auto points = m_landmarker->mark(seetaImg, largestFace.pos);
+    auto points = m_landmarker->mark(seetaImg, largestFace.pos); // 获取关键点
     
     // 遮挡检测（基于关键点）
     QRect faceRect(largestFace.pos.x, largestFace.pos.y, largestFace.pos.width, largestFace.pos.height);
-    double occlusionRatio = detectOcclusion(faceImage, faceRect);
+    double occlusionRatio = detectOcclusion(faceImage, faceRect); // 检测遮挡
     if (occlusionRatio > 0.10) {  // 遮挡超过10%，拒绝训练
         qWarning() << "人脸遮挡过多，无法录入，遮挡比例：" << (occlusionRatio * 100) << "%";
         return false;
     }
     
     // 提取人脸特征
-    int featureSize = m_recognizer->GetExtractFeatureSize();
+    int featureSize = m_recognizer->GetExtractFeatureSize(); // 获取特征大小
     std::vector<float> features(featureSize);
     if (!m_recognizer->Extract(seetaImg, points.data(), features.data())) {
         qWarning() << "特征提取失败";
@@ -750,17 +750,17 @@ bool SeetaFaceRecognizer::train(const QString &username, const QImage &faceImage
 #endif
 }
 
-QString SeetaFaceRecognizer::recognize(const QImage &image, float &similarity)
+QString SeetaFaceRecognizer::recognize(const QImage &image, float &similarity) // 识别人脸
 {
 #ifdef SEETAFACE_ENABLED
-    similarity = 0.0f;
+    similarity = 0.0f; // 将相似度设置为0.0f
     
     if (!m_initialized || !m_recognizer || !m_landmarker || m_trainedUsers.isEmpty()) {
-        return QString();
+        return QString(); // 如果未初始化或识别器或关键点检测器或已训练用户为空，则返回空字符串
     }
     
     if (image.isNull()) {
-        return QString();
+        return QString(); // 如果图像为空，则返回空字符串
     }
     
     // 使用原始图像进行检测（不裁剪，保持完整图像上下文）
@@ -847,103 +847,103 @@ QString SeetaFaceRecognizer::recognize(const QImage &image, float &similarity)
     
     return QString();
 #else
-    Q_UNUSED(image);
-    Q_UNUSED(similarity);
-    return QString();
+    Q_UNUSED(image); // 如果SeetaFace未启用，则返回空字符串
+    Q_UNUSED(similarity); // 如果SeetaFace未启用，则返回空字符串
+    return QString(); // 如果SeetaFace未启用，则返回空字符串
 #endif
 }
 
-bool SeetaFaceRecognizer::saveModel(const QString &modelPath)
+bool SeetaFaceRecognizer::saveModel(const QString &modelPath) // 保存模型
 {
-    QString savePath = modelPath.isEmpty() ? m_modelPath : modelPath;
+    QString savePath = modelPath.isEmpty() ? m_modelPath : modelPath; // 获取保存路径
     
-    QJsonObject root;
-    QJsonArray usersArray;
-    QJsonArray faceIdsArray;
-    QJsonArray featuresArray;
+    QJsonObject root; // 创建JSON对象
+    QJsonArray usersArray; // 创建用户数组
+    QJsonArray faceIdsArray; // 创建人脸ID数组
+    QJsonArray featuresArray; // 创建特征数组
     
     for (int i = 0; i < m_trainedUsers.size(); ++i) {
-        usersArray.append(m_trainedUsers[i]);
-        faceIdsArray.append(m_faceIds[i]);
+        usersArray.append(m_trainedUsers[i]); // 添加用户
+        faceIdsArray.append(m_faceIds[i]); // 添加人脸ID
         
         // 将特征向量转换为 JSON 数组
         QJsonArray featureArray;
         for (float f : m_faceFeatures[i]) {
-            featureArray.append(f);
+            featureArray.append(f); // 添加特征
         }
-        featuresArray.append(featureArray);
+        featuresArray.append(featureArray); // 添加特征数组
     }
     
-    root["users"] = usersArray;
-    root["faceIds"] = faceIdsArray;
-    root["features"] = featuresArray;
+    root["users"] = usersArray; // 添加用户数组
+    root["faceIds"] = faceIdsArray; // 添加人脸ID数组
+    root["features"] = featuresArray; // 添加特征数组
     
     QJsonDocument doc(root);
-    QFile file(savePath);
+    QFile file(savePath); // 创建文件
     if (file.open(QIODevice::WriteOnly)) {
-        file.write(doc.toJson());
-        file.close();
+        file.write(doc.toJson()); // 写入JSON数据
+        file.close(); // 关闭文件
         qDebug() << "模型保存成功：" << savePath;
-        return true;
+        return true; // 返回true
     } else {
         qWarning() << "无法保存模型文件：" << savePath;
-        return false;
+        return false; // 返回false
     }
 }
 
-bool SeetaFaceRecognizer::loadModel(const QString &modelPath)
+bool SeetaFaceRecognizer::loadModel(const QString &modelPath) // 加载模型
 {
-    QString loadPath = modelPath.isEmpty() ? m_modelPath : modelPath;
+    QString loadPath = modelPath.isEmpty() ? m_modelPath : modelPath; // 获取加载路径
     
     if (!QFile::exists(loadPath)) {
-        return false;
+        return false; // 如果文件不存在，则返回false
     }
     
-    QFile file(loadPath);
+    QFile file(loadPath); // 创建文件
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "无法打开模型文件：" << loadPath;
-        return false;
+        return false; // 如果文件无法打开，则返回false
     }
     
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    file.close();
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll()); // 读取JSON数据
+    file.close(); // 关闭文件
     
     if (!doc.isObject()) {
         qWarning() << "模型文件格式错误";
-        return false;
+        return false; // 如果文件格式错误，则返回false
     }
     
-    QJsonObject root = doc.object();
-    QJsonArray usersArray = root["users"].toArray();
-    QJsonArray faceIdsArray = root["faceIds"].toArray();
-    QJsonArray featuresArray = root["features"].toArray();
+    QJsonObject root = doc.object(); // 获取JSON对象
+    QJsonArray usersArray = root["users"].toArray(); // 获取用户数组
+    QJsonArray faceIdsArray = root["faceIds"].toArray(); // 获取人脸ID数组
+    QJsonArray featuresArray = root["features"].toArray(); // 获取特征数组
     
-    m_trainedUsers.clear();
-    m_faceIds.clear();
-    m_faceFeatures.clear();
+    m_trainedUsers.clear(); // 清空用户数组
+    m_faceIds.clear(); // 清空人脸ID数组
+    m_faceFeatures.clear(); // 清空特征数组
     
-    int count = qMin(usersArray.size(), qMin(faceIdsArray.size(), featuresArray.size()));
+    int count = qMin(usersArray.size(), qMin(faceIdsArray.size(), featuresArray.size())); // 获取最小数组大小
     for (int i = 0; i < count; ++i) {
-        m_trainedUsers.append(usersArray[i].toString());
-        m_faceIds.append(faceIdsArray[i].toInt());
+        m_trainedUsers.append(usersArray[i].toString()); // 添加用户
+        m_faceIds.append(faceIdsArray[i].toInt()); // 添加人脸ID
         
         QJsonArray featureArray = featuresArray[i].toArray();
-        QVector<float> features;
+        QVector<float> features; // 创建特征向量
         for (const QJsonValue &val : featureArray) {
-            features.append(val.toDouble());
+            features.append(val.toDouble()); // 添加特征
         }
-        m_faceFeatures.append(features);
+        m_faceFeatures.append(features); // 添加特征向量
     }
     
     qDebug() << "模型加载成功，已训练用户数：" << m_trainedUsers.size();
-    return true;
+    return true; // 返回true
 }
 
-void SeetaFaceRecognizer::clear()
+void SeetaFaceRecognizer::clear() // 清除所有训练数据
 {
-    m_trainedUsers.clear();
-    m_faceIds.clear();
-    m_faceFeatures.clear();
-    m_initialized = false;
+    m_trainedUsers.clear(); // 清空用户数组
+    m_faceIds.clear(); // 清空人脸ID数组
+    m_faceFeatures.clear(); // 清空特征数组
+    m_initialized = false; // 将初始化标志设置为false
     qDebug() << "已清除所有训练数据";
 }

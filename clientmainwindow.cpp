@@ -312,6 +312,7 @@ void ClientMainWindow::updateMenuDisplay()
 
 QWidget* ClientMainWindow::createDishWidget(const Dish &dish)
 {
+    //每个菜品卡片的基础样式和布局配置
     QGroupBox *dishBox = new QGroupBox(m_dishContainer);
     dishBox->setStyleSheet("QGroupBox { border: 1px solid #ddd; border-radius: 8px; padding: 10px; background-color: white; }"
                           "QGroupBox:hover { border: 2px solid #4CAF50; }");
@@ -691,6 +692,7 @@ void ClientMainWindow::onLogoutClicked()
 
 void ClientMainWindow::updateOrderDisplay()
 {
+    // 更新订单列表表格的显示，包括数据填充、对齐和列宽调整
     m_orderTable->setRowCount(m_orderItems.size());
 
     for (int i = 0; i < m_orderItems.size(); ++i) {
@@ -794,6 +796,7 @@ bool ClientMainWindow::eventFilter(QObject *obj, QEvent *event)
 
 double ClientMainWindow::calculateTotal()
 {
+    // 计算订单中所有菜品的总价格
     double total = 0.0;
     for (const OrderItem &item : m_orderItems) {
         total += item.getTotalPrice();

@@ -57,13 +57,16 @@ private:
     int m_trackerFailCount;  // Tracker 连续失败次数
     bool m_processingFrame;  // 是否正在处理帧（避免重叠处理）
     QSize m_cachedLabelSize;  // 缓存的标签尺寸
+    QPixmap m_cachedPixmap;  // 缓存的视频帧（用于流畅显示）
+    QRect m_lastDrawnFaceRect;  // 上次绘制的人脸框位置
 #ifdef SEETAFACE_AVAILABLE
     SeetaFaceRecognizer *m_faceRecognizer;
 #else
     OpenCVFaceRecognizer *m_faceRecognizer;
 #endif
 private slots:
-    void onFaceDetectionTimer();
+    void onVideoFrameChanged();  // 视频帧变化时快速更新显示
+    void onFaceDetectionTimer();  // 定时检测人脸（较低频率）
 };
 
 #endif // FACELOGINDIALOG_H

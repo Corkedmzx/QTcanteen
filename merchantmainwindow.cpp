@@ -25,7 +25,7 @@ MerchantMainWindow::MerchantMainWindow(const QString &username, QWidget *parent)
     loadDishes();
     loadOrders();
     
-    // 启动网络服务器
+    // 启动网络服务器（默认端口 8888）
     m_networkServer = new NetworkServer(this);
     connect(m_networkServer, &NetworkServer::newOrderReceived, this, &MerchantMainWindow::onNewOrderReceived);
     connect(m_networkServer, &NetworkServer::clientConnected, this, [this]() {
@@ -103,6 +103,7 @@ void MerchantMainWindow::setupUI()
 
 void MerchantMainWindow::setupDishManagementTab()
 {
+    // 菜品管理标签页的基础样式和布局配置
     m_dishTab = new QWidget();
     QHBoxLayout *mainLayout = new QHBoxLayout(m_dishTab);
     mainLayout->setContentsMargins(15, 15, 15, 15);
@@ -238,6 +239,7 @@ void MerchantMainWindow::setupDishManagementTab()
 
 void MerchantMainWindow::setupOrderManagementTab()
 {
+    // 订单管理标签页的基础样式和布局配置
     m_orderTab = new QWidget();
     QVBoxLayout *mainLayout = new QVBoxLayout(m_orderTab);
     mainLayout->setContentsMargins(15, 15, 15, 15);
@@ -284,6 +286,7 @@ void MerchantMainWindow::setupOrderManagementTab()
 
 void MerchantMainWindow::setupAccountManagementTab()
 {
+    // 账户下发管理标签页的基础样式和布局配置
     m_accountTab = new QWidget();
     QVBoxLayout *mainLayout = new QVBoxLayout(m_accountTab);
     mainLayout->setContentsMargins(15, 15, 15, 15);
@@ -422,6 +425,7 @@ void MerchantMainWindow::setupAccountManagementTab()
 
 void MerchantMainWindow::onCreateAccountClicked()
 {
+    // 创建新账户
     QString username = m_newUsernameEdit->text().trimmed();
     QString password = m_newPasswordEdit->text();
     QString confirmPassword = m_confirmPasswordEdit->text();
@@ -484,6 +488,7 @@ void MerchantMainWindow::onCreateAccountClicked()
 
 void MerchantMainWindow::onEnrollFaceClicked()
 {
+    // 录入人脸
     QString selectedUsername = m_faceAccountCombo->currentText();
     if (selectedUsername.isEmpty()) {
         QMessageBox::warning(this, "错误", "请选择要录入人脸的账户！");
@@ -505,6 +510,7 @@ void MerchantMainWindow::onEnrollFaceClicked()
 
 void MerchantMainWindow::onFaceEnrolled(const QString &username, const QString &faceImagePath)
 {
+    // 人脸录入成功
     Q_UNUSED(faceImagePath);
     statusBar()->showMessage(QString("✓ 账户 %1 人脸录入成功").arg(username), 3000);
     QMessageBox::information(this, "成功", QString("账户 %1 的人脸录入成功！").arg(username));
@@ -512,12 +518,14 @@ void MerchantMainWindow::onFaceEnrolled(const QString &username, const QString &
 
 void MerchantMainWindow::loadDishes()
 {
+    // 加载菜品列表
     m_dishes = JsonHelper::loadDishes();
     updateDishTable();
 }
 
 void MerchantMainWindow::updateDishTable()
 {
+    // 更新菜品表格
     m_dishTable->setRowCount(m_dishes.size());
 
     for (int i = 0; i < m_dishes.size(); ++i) {
@@ -546,6 +554,7 @@ void MerchantMainWindow::updateDishTable()
 
 void MerchantMainWindow::onTableSelectionChanged()
 {
+    // 表格选择变化
     bool hasSelection = m_dishTable->currentRow() >= 0;
     m_editBtn->setEnabled(hasSelection);
     m_deleteBtn->setEnabled(hasSelection);
@@ -562,6 +571,7 @@ void MerchantMainWindow::onTableSelectionChanged()
 
 void MerchantMainWindow::onAddDishClicked()
 {
+    // 添加菜品
     if (!validateForm()) {
         return;
     }
@@ -582,6 +592,7 @@ void MerchantMainWindow::onAddDishClicked()
 
 void MerchantMainWindow::onEditDishClicked()
 {
+    // 修改菜品
     int row = m_dishTable->currentRow();
     if (row < 0 || row >= m_dishes.size()) {
         return;
@@ -608,6 +619,7 @@ void MerchantMainWindow::onEditDishClicked()
 
 void MerchantMainWindow::onDeleteDishClicked()
 {
+    // 删除菜品
     int row = m_dishTable->currentRow();
     if (row < 0 || row >= m_dishes.size()) {
         return;
@@ -635,6 +647,7 @@ void MerchantMainWindow::onDeleteDishClicked()
 
 void MerchantMainWindow::onLogoutClicked()
 {
+    // 确认退出
     int ret = QMessageBox::question(this, "确认退出", "确定要退出商家端并停止服务器吗？", QMessageBox::Yes | QMessageBox::No);
     if (ret == QMessageBox::Yes) {
         if (m_networkServer && m_networkServer->isListening()) {
@@ -647,12 +660,14 @@ void MerchantMainWindow::onLogoutClicked()
 
 void MerchantMainWindow::refreshDishList()
 {
+    // 刷新菜品列表
     loadDishes();
     QMessageBox::information(this, "提示", "菜品列表已刷新！");
 }
 
 void MerchantMainWindow::loadOrders()
 {
+    // 加载订单列表
     m_orders = JsonHelper::loadOrders();
     updateOrderTable();
 }
@@ -763,12 +778,13 @@ void MerchantMainWindow::updateOrderTable()
 
 void MerchantMainWindow::refreshOrders()
 {
+    // 刷新订单列表
     loadOrders();
 }
 
 void MerchantMainWindow::onCompleteOrderClicked(const QString &orderNo)
 {
-    // 确认操作
+    // 确认完成订单
     int ret = QMessageBox::question(this, "确认完成", 
                                      QString("确定要将订单 %1 标记为已完成吗？").arg(orderNo),
                                      QMessageBox::Yes | QMessageBox::No);
@@ -790,6 +806,7 @@ void MerchantMainWindow::onCompleteOrderClicked(const QString &orderNo)
 
 void MerchantMainWindow::sendOrderCompletedNotification(const QString &orderNo)
 {
+    // 发送订单完成通知
     if (!m_networkServer) {
         return;
     }
@@ -810,6 +827,7 @@ void MerchantMainWindow::sendOrderCompletedNotification(const QString &orderNo)
 
 void MerchantMainWindow::loadAccountList()
 {
+    // 加载账户列表
     m_accountTable->setRowCount(0);
     
     QFile userFile("user.json");
@@ -856,6 +874,7 @@ void MerchantMainWindow::loadAccountList()
 
 void MerchantMainWindow::deleteCompletedOrders()
 {
+    // 确认删除已完成订单
     int ret = QMessageBox::question(this, "确认删除", "确定要一键删除所有“已完成”的订单吗？", QMessageBox::Yes | QMessageBox::No);
     if (ret != QMessageBox::Yes) {
         return;
@@ -871,6 +890,7 @@ void MerchantMainWindow::deleteCompletedOrders()
 
 void MerchantMainWindow::clearForm()
 {
+    // 清空表单
     m_nameEdit->clear();
     m_categoryCombo->setCurrentIndex(0);
     m_priceSpin->setValue(0.0);
@@ -881,6 +901,7 @@ void MerchantMainWindow::clearForm()
 
 void MerchantMainWindow::fillForm(const Dish &dish)
 {
+    // 填充表单
     m_nameEdit->setText(dish.getName());
     int categoryIndex = m_categoryCombo->findText(dish.getCategory());
     if (categoryIndex >= 0) {
@@ -895,6 +916,7 @@ void MerchantMainWindow::fillForm(const Dish &dish)
 
 Dish MerchantMainWindow::getDishFromForm()
 {
+    // 获取表单数据
     Dish dish;
     dish.setName(m_nameEdit->text().trimmed());
     dish.setCategory(m_categoryCombo->currentText().trimmed());
@@ -906,6 +928,7 @@ Dish MerchantMainWindow::getDishFromForm()
 
 bool MerchantMainWindow::validateForm()
 {
+    // 验证表单数据
     if (m_nameEdit->text().trimmed().isEmpty()) {
         QMessageBox::warning(this, "错误", "请输入菜品名称！");
         m_nameEdit->setFocus();
@@ -926,13 +949,13 @@ bool MerchantMainWindow::validateForm()
 
 void MerchantMainWindow::onNewOrderReceived(const QJsonObject &orderJson)
 {
-    // 验证JSON数据
+    // 收到新订单
     if (orderJson.isEmpty() || !orderJson.contains("orderNo")) {
         qDebug() << "收到无效的订单数据";
         return;
     }
     
-    // 将JSON订单转换为Order对象并保存
+    // 将JSON订单转换为Order对象
     Order order;
     order.setOrderNo(orderJson["orderNo"].toString());
     order.setUsername(orderJson["username"].toString());
@@ -952,7 +975,7 @@ void MerchantMainWindow::onNewOrderReceived(const QJsonObject &orderJson)
         order.setCreateTime(QDateTime::currentDateTime());
     }
     
-    // 加载菜品信息
+    // 加载所有菜品信息
     QVector<Dish> allDishes = JsonHelper::loadDishes();
     QJsonArray itemsArray = orderJson.contains("items") ? orderJson["items"].toArray() : QJsonArray();
     QVector<OrderItem> items;

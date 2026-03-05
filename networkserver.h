@@ -15,6 +15,7 @@ public:
     explicit NetworkServer(QObject *parent = nullptr);
     ~NetworkServer();
 
+    // 默认监听端口为 8888
     bool startServer(quint16 port = 8888);
     void stopServer();
     bool isListening() const;

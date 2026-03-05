@@ -363,9 +363,11 @@ void LoginWindow::onMerchantLoginClicked()
             if (JsonHelper::saveUser(finalUsername, newPwd)) {
                 // 如果修改了账号，需要删除旧账号
                 if (!newUsername.isEmpty() && newUsername != currentUsername) {
-                    // 注意：这里简化处理，实际应该有一个删除用户的方法
-                    // 由于当前实现是覆盖保存，如果账号改变，旧账号数据仍会保留
-                    // 但新账号密码已保存成功
+                    if (!JsonHelper::deleteUser(currentUsername)) {
+                        QMessageBox::warning(&changePwdDialog, "警告", 
+                            QString("新账号密码已保存，但删除旧账号 '%1' 失败。\n"
+                                    "旧账号可能仍然存在，请手动检查。").arg(currentUsername));
+                    }
                 }
                 QMessageBox::information(&changePwdDialog, "成功", "账号/密码修改成功！");
                 changePwdDialog.accept();
