@@ -43,11 +43,20 @@ FaceLoginDialog::FaceLoginDialog(QWidget *parent)
                        "3. 可执行文件目录下的 models 子目录").arg(modelPath));
         }
     });
-#else
+#elif defined(OPENCV_AVAILABLE)
     m_faceRecognizer = new OpenCVFaceRecognizer();
     if (!m_faceRecognizer->initialize()) {
         QMessageBox::warning(this, "警告", "人脸识别器初始化失败，可能没有已录入的人脸数据！");
     }
+#else
+    // 没有可用的库，显示错误并关闭对话框
+    m_faceRecognizer = nullptr;
+    QMessageBox::warning(this, "错误", 
+        "人脸识别功能不可用！\n\n"
+        "请安装 OpenCV 或 SeetaFace6Open 库以启用人脸识别功能。\n"
+        "当前可以使用账号密码登录。");
+    reject();  // 关闭对话框
+    return;
 #endif
 
     setupUI();

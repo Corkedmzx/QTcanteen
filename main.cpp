@@ -6,8 +6,6 @@
 #include <QApplication>
 #include <QLocale>
 #include <QTranslator>
-#include <QMessageBox>
-#include <QDebug>
 #include <exception>
 #include <cstdlib>
 

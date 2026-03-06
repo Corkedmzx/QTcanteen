@@ -385,12 +385,19 @@ void MerchantMainWindow::setupAccountManagementTab()
     faceAccountLayout->addWidget(m_faceAccountCombo);
     faceLayout->addLayout(faceAccountLayout);
 
+#if defined(SEETAFACE_AVAILABLE) || defined(OPENCV_AVAILABLE)
     m_enrollFaceBtn = new QPushButton("录入人脸", faceGroup);
     m_enrollFaceBtn->setFixedSize(120, 40);
     m_enrollFaceBtn->setStyleSheet("QPushButton { background-color: #FF9800; color: white; border-radius: 5px; font-size: 14px; }"
                                    "QPushButton:hover { background-color: #F57C00; }");
     connect(m_enrollFaceBtn, &QPushButton::clicked, this, &MerchantMainWindow::onEnrollFaceClicked);
     faceLayout->addWidget(m_enrollFaceBtn, 0, Qt::AlignLeft);
+#else
+    m_enrollFaceBtn = nullptr;
+    QLabel *faceDisabledLabel = new QLabel("人脸识别功能不可用（需要安装 OpenCV 或 SeetaFace）", faceGroup);
+    faceDisabledLabel->setStyleSheet("color: #999; font-size: 12px;");
+    faceLayout->addWidget(faceDisabledLabel, 0, Qt::AlignLeft);
+#endif
 
     mainLayout->addWidget(faceGroup);
 
@@ -488,6 +495,7 @@ void MerchantMainWindow::onCreateAccountClicked()
 
 void MerchantMainWindow::onEnrollFaceClicked()
 {
+#if defined(SEETAFACE_AVAILABLE) || defined(OPENCV_AVAILABLE)
     // 录入人脸
     QString selectedUsername = m_faceAccountCombo->currentText();
     if (selectedUsername.isEmpty()) {
@@ -506,6 +514,9 @@ void MerchantMainWindow::onEnrollFaceClicked()
     connect(dialog, &FaceEnrollDialog::faceEnrolled, this, &MerchantMainWindow::onFaceEnrolled);
     dialog->exec();
     dialog->deleteLater();
+#else
+    QMessageBox::warning(this, "错误", "人脸识别功能不可用！\n\n请安装 OpenCV 或 SeetaFace6Open 库以启用人脸识别功能。");
+#endif
 }
 
 void MerchantMainWindow::onFaceEnrolled(const QString &username, const QString &faceImagePath)

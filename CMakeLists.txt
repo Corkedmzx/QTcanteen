@@ -13,10 +13,11 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network LinguistTools 
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools Multimedia MultimediaWidgets)
 
 # ============================================
-# OpenCV 配置
+# OpenCV 配置（可选依赖）
 # ============================================
 # OpenCV 路径配置
 set(OPENCV_ROOT "E:/share/opencv452" CACHE PATH "OpenCV root directory")
+set(OpenCV_FOUND FALSE)
 
 # 设置 OpenCV_DIR 以便 find_package 能找到 OpenCVConfig.cmake
 # OpenCVConfig.cmake 位于 x64/mingw/lib 目录下
@@ -44,6 +45,7 @@ if(OpenCV_FOUND)
         set(OpenCV_INCLUDE_DIRS "${OPENCV_ROOT}/include")
         message(STATUS "OpenCV_INCLUDE_DIRS was not set, using: ${OpenCV_INCLUDE_DIRS}")
     endif()
+    set(OpenCV_FOUND TRUE)
 else()
     message(STATUS "OpenCV not found via find_package. Trying to find manually...")
     # 手动查找 OpenCV
@@ -81,6 +83,7 @@ else()
         
         if(OpenCV_LIBS)
             message(STATUS "Found OpenCV libraries: ${OpenCV_LIBS}")
+            set(OpenCV_FOUND TRUE)
         else()
             # 如果 GLOB 失败，尝试查找核心库
             find_library(OpenCV_CORE_LIB
@@ -109,23 +112,40 @@ else()
                     list(APPEND OpenCV_LIBS ${OpenCV_IMGCODECS_LIB})
                 endif()
                 message(STATUS "Found OpenCV libraries: ${OpenCV_LIBS}")
+                set(OpenCV_FOUND TRUE)
             else()
-                message(FATAL_ERROR "OpenCV core library not found. Please check OpenCV installation at ${OPENCV_ROOT}")
+                message(WARNING "OpenCV core library not found. Face recognition features will be disabled.")
+                message(WARNING "To enable face recognition, please install OpenCV at ${OPENCV_ROOT}")
+                set(OpenCV_FOUND FALSE)
             endif()
         endif()
     else()
-        message(FATAL_ERROR "OpenCV not found. Please check OpenCV installation at ${OPENCV_ROOT}")
+        message(WARNING "OpenCV not found. Face recognition features will be disabled.")
+        message(WARNING "To enable face recognition, please install OpenCV at ${OPENCV_ROOT}")
+        set(OpenCV_FOUND FALSE)
     endif()
 endif()
 
-# 最终确保 OpenCV_INCLUDE_DIRS 已设置（无论 find_package 是否成功）
-if(NOT OpenCV_INCLUDE_DIRS)
+# 最终检查 OpenCV 是否可用
+if(NOT OpenCV_FOUND)
     if(EXISTS "${OPENCV_ROOT}/include/opencv2/opencv.hpp")
         set(OpenCV_INCLUDE_DIRS "${OPENCV_ROOT}/include")
         message(STATUS "OpenCV_INCLUDE_DIRS not set by find_package, using: ${OpenCV_INCLUDE_DIRS}")
-    else()
-        message(FATAL_ERROR "OpenCV headers not found at ${OPENCV_ROOT}/include/opencv2/opencv.hpp")
+        # 再次尝试查找库
+        find_library(OpenCV_CORE_LIB opencv_core PATHS "${OPENCV_ROOT}/x64/mingw/lib" "${OPENCV_ROOT}/lib")
+        if(OpenCV_CORE_LIB)
+            set(OpenCV_LIBS ${OpenCV_CORE_LIB})
+            set(OpenCV_FOUND TRUE)
+            message(STATUS "OpenCV found manually")
+        endif()
     endif()
+endif()
+
+if(OpenCV_FOUND)
+    message(STATUS "OpenCV is available - face recognition features will be enabled")
+else()
+    message(STATUS "OpenCV is not available - face recognition features will be disabled")
+    message(STATUS "Core features (ordering, network communication) will still work")
 endif()
 
 # ============================================
@@ -222,9 +242,6 @@ set(TS_FILES QTcanteen_zh_CN.ts)
 
 set(PROJECT_SOURCES
         main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
         dish.cpp
         dish.h
         orderitem.cpp
@@ -245,10 +262,6 @@ set(PROJECT_SOURCES
         faceenrolldialog.h
         facelogindialog.cpp
         facelogindialog.h
-        opencvfacerecognizer.cpp
-        opencvfacerecognizer.h
-        seetafacefacerecognizer.cpp
-        seetafacefacerecognizer.h
         loginwindow.ui
         registerwindow.cpp
         registerwindow.h
@@ -289,38 +302,58 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
+# 根据可用的库添加相应的源文件
+if(OpenCV_FOUND)
+    target_sources(QTcanteen PRIVATE
+        opencvfacerecognizer.cpp
+        opencvfacerecognizer.h
+    )
+    message(STATUS "OpenCV face recognizer source files added")
+endif()
+
+if(SEETAFACE_FOUND)
+    target_sources(QTcanteen PRIVATE
+        seetafacefacerecognizer.cpp
+        seetafacefacerecognizer.h
+    )
+    message(STATUS "SeetaFace face recognizer source files added")
+endif()
+
 # 链接库
 target_link_libraries(QTcanteen PRIVATE 
     Qt${QT_VERSION_MAJOR}::Widgets 
     Qt${QT_VERSION_MAJOR}::Network 
     Qt${QT_VERSION_MAJOR}::Multimedia 
     Qt${QT_VERSION_MAJOR}::MultimediaWidgets 
-    ${OpenCV_LIBS}
 )
 
-# 添加 OpenCV 包含目录（确保在所有情况下都设置）
-# 首先确保 OpenCV_INCLUDE_DIRS 已设置
-if(NOT OpenCV_INCLUDE_DIRS)
-    # 如果还没有设置，直接使用 OPENCV_ROOT
-    if(EXISTS "${OPENCV_ROOT}/include/opencv2/opencv.hpp")
-        set(OpenCV_INCLUDE_DIRS "${OPENCV_ROOT}/include")
-        message(STATUS "Setting OpenCV_INCLUDE_DIRS to: ${OpenCV_INCLUDE_DIRS}")
-    else()
-        message(FATAL_ERROR "OpenCV headers not found at ${OPENCV_ROOT}/include/opencv2/opencv.hpp")
+# 只在找到 OpenCV 时链接 OpenCV 库和添加包含目录
+if(OpenCV_FOUND)
+    target_link_libraries(QTcanteen PRIVATE ${OpenCV_LIBS})
+    target_compile_definitions(QTcanteen PRIVATE OPENCV_AVAILABLE)
+    
+    # 确保 OpenCV_INCLUDE_DIRS 已设置
+    if(NOT OpenCV_INCLUDE_DIRS)
+        if(EXISTS "${OPENCV_ROOT}/include/opencv2/opencv.hpp")
+            set(OpenCV_INCLUDE_DIRS "${OPENCV_ROOT}/include")
+            message(STATUS "Setting OpenCV_INCLUDE_DIRS to: ${OpenCV_INCLUDE_DIRS}")
+        endif()
+    endif()
+    
+    # 确保路径是绝对路径
+    if(OpenCV_INCLUDE_DIRS)
+        get_filename_component(OpenCV_INCLUDE_DIRS "${OpenCV_INCLUDE_DIRS}" ABSOLUTE)
+        
+        # 验证路径是否存在
+        if(EXISTS "${OpenCV_INCLUDE_DIRS}/opencv2/opencv.hpp")
+            # 设置包含目录
+            target_include_directories(QTcanteen PRIVATE ${OpenCV_INCLUDE_DIRS})
+            message(STATUS "OpenCV include directories added to target: ${OpenCV_INCLUDE_DIRS}")
+        else()
+            message(WARNING "OpenCV headers not found at ${OpenCV_INCLUDE_DIRS}/opencv2/opencv.hpp")
+        endif()
     endif()
 endif()
-
-# 确保路径是绝对路径
-get_filename_component(OpenCV_INCLUDE_DIRS "${OpenCV_INCLUDE_DIRS}" ABSOLUTE)
-
-# 验证路径是否存在
-if(NOT EXISTS "${OpenCV_INCLUDE_DIRS}/opencv2/opencv.hpp")
-    message(FATAL_ERROR "OpenCV headers not found at ${OpenCV_INCLUDE_DIRS}/opencv2/opencv.hpp")
-endif()
-
-# 设置包含目录
-target_include_directories(QTcanteen PRIVATE ${OpenCV_INCLUDE_DIRS})
-message(STATUS "OpenCV include directories added to target: ${OpenCV_INCLUDE_DIRS}")
 
     # 如果找到 SeetaFace，则链接
 if(SEETAFACE_FOUND)

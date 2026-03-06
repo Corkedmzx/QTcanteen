@@ -74,6 +74,14 @@ QTcanteen 是一个基于 Qt 框架开发的餐厅点餐管理系统，提供客
 - **OpenCV 4.5.2+**：用于人脸识别（可选）
 - **SeetaFace6Open**：用于人脸识别（可选）
 
+**重要提示**：
+- 如果没有安装 OpenCV 或 SeetaFace6Open，项目**仍然可以正常编译和运行**
+- 核心功能（点餐、订单管理、网络通信）**不受影响**，可以正常使用
+- 只有**人脸识别相关功能**会被禁用：
+  - 商家端"录入人脸"按钮会被隐藏
+  - 登录窗口"人脸识别登录"按钮会被隐藏
+  - 相关功能会显示提示信息，引导用户使用账号密码登录
+
 ## 快速开始
 
 ### 1. 克隆项目
@@ -83,13 +91,21 @@ git clone https://github.com/Corkedmzx/QTcanteen.git
 cd QTcanteen
 ```
 
-### 2. 配置 OpenCV（可选）
+### 2. 配置 OpenCV 或 SeetaFace（可选）
+
+**如果不安装这些库，项目仍然可以编译和运行，只是无法使用人脸识别功能。**
 
 如果使用 OpenCV 进行人脸识别，需要：
 
 1. 下载并解压 OpenCV 到指定目录（默认：`E:/share/opencv452`）
 2. 在 `CMakeLists.txt` 中修改 `OPENCV_ROOT` 路径
-3. 编译时 CMake 会自动查找 OpenCV
+3. 编译时 CMake 会自动查找 OpenCV，如果找不到会显示警告但不会阻止编译
+
+如果使用 SeetaFace6Open 进行人脸识别，需要：
+
+1. 下载并解压 SeetaFace6Open 到指定目录（默认：`E:/share/SeetaFace`）
+2. 在 `CMakeLists.txt` 中修改 `SEETAFACE_ROOT` 路径，或设置环境变量 `SEETAFACE_ROOT`
+3. 编译时 CMake 会自动查找 SeetaFace，如果找不到会显示警告但不会阻止编译
 
 ### 3. 编译项目
 
@@ -339,7 +355,11 @@ QTcanteen/
 A: 检查 `CMakeLists.txt` 中的 `OPENCV_ROOT` 路径是否正确，确保 OpenCV 已正确安装。
 
 ### Q: 人脸识别功能无法使用？
-A: 确保已安装 OpenCV 或 SeetaFace，并在 CMake 配置时正确设置了相关路径。
+A: 
+- 如果编译时没有找到 OpenCV 或 SeetaFace，CMake 会显示警告但不会阻止编译
+- 运行时，如果没有安装这些库，相关功能会被自动禁用
+- 要启用人脸识别功能，请安装 OpenCV 或 SeetaFace6Open，并确保在 `CMakeLists.txt` 中正确配置了路径
+- 核心功能（点餐、订单管理、网络通信）不受影响，可以正常使用
 
 ### Q: 网络连接失败？
 A: 确保商家端已启动服务器（端口 8888），客户端会自动尝试连接。

@@ -6,6 +6,8 @@
 #include <QVector>
 #include <QRect>
 #include <QPoint>
+
+#ifdef OPENCV_AVAILABLE
 #include <opencv2/opencv.hpp>
 #include <opencv2/objdetect.hpp>
 #include <opencv2/imgproc.hpp>
@@ -33,6 +35,7 @@ namespace face {
 }
 }
 #endif
+#endif // OPENCV_AVAILABLE
 
 class OpenCVFaceRecognizer
 {
@@ -95,18 +98,14 @@ private:
     // 遮挡检测（返回遮挡比例，0.0-1.0）
     double detectOcclusion(const cv::Mat &faceImage, const cv::Rect &faceRect);
 
+#ifdef OPENCV_AVAILABLE
 #ifdef OPENCV_FACE_AVAILABLE
     cv::Ptr<cv::face::LBPHFaceRecognizer> m_recognizer;
 #endif
     cv::CascadeClassifier m_faceCascade;
     
     // 使用深度特征存储（更现代的方法）
-    QVector<QString> m_trainedUsers;
     QVector<cv::Mat> m_faceFeatures;  // 存储深度特征向量
-    QVector<int> m_labels;  // 保留用于兼容性
-    
-    QString m_modelPath;
-    bool m_initialized;
     
     // DNN 模型（如果可用）
     cv::dnn::Net m_faceNet;
@@ -123,6 +122,12 @@ private:
     int m_trackFrameCount;    // 连续跟踪的帧数
     bool m_trackerInitialized;
 #endif
+#endif // OPENCV_AVAILABLE
+    
+    QVector<QString> m_trainedUsers;
+    QVector<int> m_labels;  // 保留用于兼容性
+    QString m_modelPath;
+    bool m_initialized;
 };
 
 #endif // OPENCVFACERECOGNIZER_H

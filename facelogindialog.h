@@ -17,8 +17,19 @@
 #include <QVideoFrame>
 #ifdef SEETAFACE_AVAILABLE
 #include "seetafacefacerecognizer.h"
-#else
+#elif defined(OPENCV_AVAILABLE)
 #include "opencvfacerecognizer.h"
+#else
+// 如果没有可用的库，定义空的前向声明
+class FaceRecognizerBase {
+public:
+    virtual ~FaceRecognizerBase() {}
+    virtual bool initialize() { return false; }
+    virtual bool train(const QString &, const QImage &) { return false; }
+    virtual QString recognize(const QImage &, double &) { return QString(); }
+    virtual bool detectFace(const QImage &, QRect &) { return false; }
+};
+typedef FaceRecognizerBase OpenCVFaceRecognizer;
 #endif
 
 class FaceLoginDialog : public QDialog
@@ -61,8 +72,10 @@ private:
     QRect m_lastDrawnFaceRect;  // 上次绘制的人脸框位置
 #ifdef SEETAFACE_AVAILABLE
     SeetaFaceRecognizer *m_faceRecognizer;
-#else
+#elif defined(OPENCV_AVAILABLE)
     OpenCVFaceRecognizer *m_faceRecognizer;
+#else
+    FaceRecognizerBase *m_faceRecognizer;
 #endif
 private slots:
     void onVideoFrameChanged();  // 视频帧变化时快速更新显示

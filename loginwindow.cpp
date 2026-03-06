@@ -126,10 +126,13 @@ void LoginWindow::onMerchantLoginClicked()
     loginBtn->setStyleSheet("QPushButton { background-color: #2196F3; color: white; border-radius: 5px; }"
                             "QPushButton:hover { background-color: #0b7dda; }");
 
-    QPushButton *faceLoginBtn = new QPushButton("人脸识别登录", &dialog);
+    QPushButton *faceLoginBtn = nullptr;
+#if defined(SEETAFACE_AVAILABLE) || defined(OPENCV_AVAILABLE)
+    faceLoginBtn = new QPushButton("人脸识别登录", &dialog);
     faceLoginBtn->setMinimumHeight(38);
     faceLoginBtn->setStyleSheet("QPushButton { background-color: #FF9800; color: white; border-radius: 5px; }"
                                 "QPushButton:hover { background-color: #F57C00; }");
+#endif
 
     QPushButton *recoverBtn = new QPushButton("更改账号/密码", &dialog);
     recoverBtn->setMinimumHeight(38);
@@ -140,7 +143,9 @@ void LoginWindow::onMerchantLoginClicked()
     cancelBtn->setMinimumHeight(38);
 
     btnLayout->addWidget(loginBtn);
+#if defined(SEETAFACE_AVAILABLE) || defined(OPENCV_AVAILABLE)
     btnLayout->addWidget(faceLoginBtn);
+#endif
     btnLayout->addWidget(recoverBtn);
     btnLayout->addWidget(cancelBtn);
 
@@ -182,7 +187,8 @@ void LoginWindow::onMerchantLoginClicked()
         dialog.accept();
     });
 
-    // 人脸识别登录
+    // 人脸识别登录（仅在库可用时连接）
+#if defined(SEETAFACE_AVAILABLE) || defined(OPENCV_AVAILABLE)
     QObject::connect(faceLoginBtn, &QPushButton::clicked, &dialog, [&dialog, this]() {
         // 检查是否有人脸数据
         if (!JsonHelper::hasAnyFaceData()) {
@@ -206,6 +212,7 @@ void LoginWindow::onMerchantLoginClicked()
         faceDialog->exec();
         faceDialog->deleteLater();
     });
+#endif
 
     // 更改账号/密码
     QObject::connect(recoverBtn, &QPushButton::clicked, &dialog, [&dialog, usernameEdit, passwordEdit]() {

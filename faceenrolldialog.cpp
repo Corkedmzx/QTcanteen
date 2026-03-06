@@ -43,9 +43,17 @@ FaceEnrollDialog::FaceEnrollDialog(const QString &username, QWidget *parent)
                        "3. 可执行文件目录下的 models 子目录").arg(modelPath));
         }
     });
-#else
+#elif defined(OPENCV_AVAILABLE)
     m_faceRecognizer = new OpenCVFaceRecognizer();
     m_faceRecognizer->initialize(); // 加载已有模型
+#else
+    // 没有可用的库，显示错误并关闭对话框
+    m_faceRecognizer = nullptr;
+    QMessageBox::warning(this, "错误", 
+        "人脸识别功能不可用！\n\n"
+        "请安装 OpenCV 或 SeetaFace6Open 库以启用人脸识别功能。");
+    reject();  // 关闭对话框
+    return;
 #endif
 
     setupUI();

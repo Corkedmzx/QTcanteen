@@ -342,6 +342,9 @@ QWidget* ClientMainWindow::createDishWidget(const Dish &dish)
             fullPath = imagePath;
             if (QFileInfo::exists(fullPath)) {
                 found = true;
+                qDebug() << "找到图片（绝对路径）:" << fullPath;
+            } else {
+                qDebug() << "绝对路径不存在:" << fullPath;
             }
         } else {
             // 相对路径，尝试多个可能的位置
@@ -353,12 +356,13 @@ QWidget* ClientMainWindow::createDishWidget(const Dish &dish)
             
             // 2. 相对于可执行文件所在目录向上查找项目根目录
             QDir appDirObj(appDir);
-            // 向上查找，直到找到包含 images 目录的目录（项目根目录）
             QDir tempDir = appDirObj;
             int maxLevels = 5; // 最多向上查找5级
             for (int i = 0; i < maxLevels; ++i) {
-                if (QDir(tempDir.absoluteFilePath("images")).exists()) {
+                QString imagesDir = tempDir.absoluteFilePath("images");
+                if (QDir(imagesDir).exists()) {
                     searchPaths << tempDir.absolutePath();
+                    qDebug() << "从应用程序目录找到项目根目录:" << tempDir.absolutePath();
                     break;
                 }
                 if (!tempDir.cdUp()) {
@@ -367,16 +371,21 @@ QWidget* ClientMainWindow::createDishWidget(const Dish &dish)
             }
             
             // 3. 相对于当前工作目录
-            searchPaths << QDir::current().absolutePath();
+            QString currentDir = QDir::current().absolutePath();
+            searchPaths << currentDir;
             
             // 4. 相对于当前工作目录向上查找项目根目录
-            QDir currentDir = QDir::current();
-            // 向上查找，直到找到包含 images 目录的目录（项目根目录）
-            QDir tempDir2 = currentDir;
+            QDir currentDirObj(currentDir);
+            QDir tempDir2 = currentDirObj;
             int maxLevels2 = 5; // 最多向上查找5级
             for (int i = 0; i < maxLevels2; ++i) {
-                if (QDir(tempDir2.absoluteFilePath("images")).exists()) {
-                    searchPaths << tempDir2.absolutePath();
+                QString imagesDir = tempDir2.absoluteFilePath("images");
+                if (QDir(imagesDir).exists()) {
+                    QString projectRoot = tempDir2.absolutePath();
+                    if (!searchPaths.contains(projectRoot)) {
+                        searchPaths << projectRoot;
+                        qDebug() << "从工作目录找到项目根目录:" << projectRoot;
+                    }
                     break;
                 }
                 if (!tempDir2.cdUp()) {
@@ -384,13 +393,18 @@ QWidget* ClientMainWindow::createDishWidget(const Dish &dish)
                 }
             }
             
-            // 尝试每个路径
+            // 去重并尝试每个路径
+            searchPaths.removeDuplicates();
+            qDebug() << "尝试查找图片:" << imagePath;
+            qDebug() << "搜索路径列表:" << searchPaths;
+            
             for (const QString &basePath : searchPaths) {
                 QString testPath = QDir(basePath).absoluteFilePath(imagePath);
+                qDebug() << "  尝试:" << testPath;
                 if (QFileInfo::exists(testPath)) {
                     fullPath = testPath;
                     found = true;
-                    qDebug() << "找到图片:" << fullPath;
+                    qDebug() << "✓ 找到图片:" << fullPath;
                     break;
                 }
             }
@@ -403,19 +417,19 @@ QWidget* ClientMainWindow::createDishWidget(const Dish &dish)
                 // 图片加载成功，显示图片
                 imageLabel->setPixmap(pixmap.scaled(200, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
                 imageLabel->setStyleSheet("border: 1px solid #ddd; border-radius: 4px;");
+                qDebug() << "图片加载成功:" << dish.getName() << "->" << fullPath;
             } else {
                 // 图片文件存在但加载失败
-                qDebug() << "图片文件存在但加载失败:" << fullPath;
-                imageLabel->setText("图片格式错误\n" + imagePath);
+                qDebug() << "✗ 图片文件存在但加载失败:" << fullPath;
+                imageLabel->setText("图片格式错误\n" + QFileInfo(imagePath).fileName());
                 imageLabel->setStyleSheet("border: 1px dashed #ccc; border-radius: 4px; background-color: #f9f9f9; color: #999;");
             }
         } else {
             // 图片文件不存在
-            qDebug() << "图片文件未找到，尝试的路径:";
-            qDebug() << "  原始路径:" << imagePath;
+            qDebug() << "✗ 图片文件未找到:" << imagePath;
             qDebug() << "  应用程序目录:" << QCoreApplication::applicationDirPath();
             qDebug() << "  当前工作目录:" << QDir::current().absolutePath();
-            imageLabel->setText("图片未找到\n" + imagePath);
+            imageLabel->setText("图片未找到\n" + QFileInfo(imagePath).fileName());
             imageLabel->setStyleSheet("border: 1px dashed #ccc; border-radius: 4px; background-color: #f9f9f9; color: #999;");
         }
     } else {
