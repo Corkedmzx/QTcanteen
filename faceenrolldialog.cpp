@@ -112,7 +112,7 @@ void FaceEnrollDialog::setupUI()
     m_videoLabel->setAlignment(Qt::AlignCenter);
     m_videoLabel->setStyleSheet("border: 2px solid #ddd; border-radius: 5px; background-color: #000;");
     videoLayout->addWidget(m_videoLabel);
-    
+
     // 预览标签（用于显示捕获的图像，覆盖在视频窗口上）
     m_previewLabel = new QLabel(videoContainer);
     m_previewLabel->setMinimumSize(480, 360);
@@ -121,7 +121,7 @@ void FaceEnrollDialog::setupUI()
     m_previewLabel->setScaledContents(true);
     m_previewLabel->hide();
     videoLayout->addWidget(m_previewLabel);
-    
+
     // 确保正确的 Z-order：视频标签 < 预览标签
     m_previewLabel->raise();   // 预览标签在最上层
     
@@ -272,7 +272,7 @@ void FaceEnrollDialog::onCaptureClicked()
         QMessageBox::warning(this, "错误", "摄像头未就绪，请稍候再试！");
         return;
     }
-    
+
     m_imageCapture->capture();
 }
 
@@ -323,7 +323,7 @@ void FaceEnrollDialog::onImageCaptured(int id, const QImage &image)
     }
     if (m_previewLabel) {
         m_previewLabel->setPixmap(QPixmap::fromImage(displayImage));
-        m_previewLabel->show();
+    m_previewLabel->show();
         m_previewLabel->raise();  // 确保预览标签在最上层
     }
 
