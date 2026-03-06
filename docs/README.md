@@ -79,7 +79,7 @@ QTcanteen 是一个基于 Qt 框架开发的餐厅点餐管理系统，提供客
 ### 1. 克隆项目
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Corkedmzx/QTcanteen.git
 cd QTcanteen
 ```
 
